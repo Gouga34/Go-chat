@@ -7,8 +7,8 @@ import (
 
 //Socket représente la connection entre un client et un serveur et les différentes actions que l'on peut effectuer dessus
 type Socket struct {
-	connection net.Conn
-	listener   net.Listener
+	clients  []net.Conn
+	listener net.Listener
 }
 
 //Listen permet d'écouter un port. Arrête tout si erreur levée. Le port doit être de la forme ":1200"
@@ -29,18 +29,21 @@ func (s *Socket) CloseListener() {
 }
 
 //Accept permet d'accepter une connection et de l'enregistrer dans Socket.connection
-func (s *Socket) Accept() {
-	var err error
-	s.connection, err = s.listener.Accept()
+func (s *Socket) Accept() int {
+
+	newClient, err := s.listener.Accept()
 	if err != nil {
 		log.Fatal(err)
 	}
+	s.clients = append(s.clients, newClient)
+
+	return len(s.clients)
 }
 
 //Read permet de lire un message. retourne le message sous la forme de string
-func (s *Socket) Read() string {
+func (s *Socket) Read(numClient int) string {
 	message := make([]byte, 500)
-	_, errRead := s.connection.Read(message)
+	_, errRead := s.clients[numClient].Read(message)
 	if errRead != nil {
 		log.Fatal(errRead)
 	}
@@ -48,17 +51,21 @@ func (s *Socket) Read() string {
 }
 
 //Write permet d'envoyer un message. Le message pris en paramètre doit être un string
-func (s *Socket) Write(message string) {
+func (s *Socket) Write(numClient int, message string) {
 	toSend := []byte(message)
-	_, err := s.connection.Write(toSend)
+	_, err := s.clients[numClient].Write(toSend)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-//CloseConnection met fin à la connection
-func (s *Socket) CloseConnection() {
-	err := s.connection.Close()
+//CloseConnection met fin à la connection du client et le supprime de la liste des clients connectés
+func (s *Socket) CloseConnection(numClient int) {
+	client := s.clients[numClient]
+
+	s.clients = append(s.clients[:numClient], s.clients[numClient+1:]...)
+
+	err := client.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -66,9 +73,9 @@ func (s *Socket) CloseConnection() {
 
 //Connect permet la connection à un serveur ex d'appel :Connect("tcp", "localhost", ":1200")
 func (s *Socket) Connect(protocol string, host string, port string) {
-	var err error
-	s.connection, err = net.Dial(protocol, host+port)
+	conn, err := net.Dial(protocol, host+port)
 	if err != nil {
 		log.Fatal(err)
 	}
+	s.clients = append(s.clients, conn)
 }
