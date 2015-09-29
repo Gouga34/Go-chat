@@ -22,12 +22,12 @@ make
 
 * Lancement du serveur
 ```bash
-./server
+./serverChat
 ```
 
 * Lancement du client
 ```bash
-./client
+./clientChat
 ```
 
 ---
@@ -36,5 +36,3 @@ make
 
 * Serveur Go, capable de gérer plusieurs clients simultanément
 * Client web
-
-
