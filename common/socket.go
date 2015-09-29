@@ -72,10 +72,12 @@ func (s *Socket) CloseConnection(numClient int) {
 }
 
 //Connect permet la connection à un serveur ex d'appel :Connect("tcp", "localhost", ":1200")
-func (s *Socket) Connect(protocol string, host string, port string) {
+func (s *Socket) Connect(protocol string, host string, port string) int {
 	conn, err := net.Dial(protocol, host+port)
 	if err != nil {
 		log.Fatal(err)
 	}
 	s.clients = append(s.clients, conn)
+
+	return len(s.clients)
 }
