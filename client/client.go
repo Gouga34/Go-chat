@@ -9,8 +9,6 @@ import (
 	"strings"
 )
 
-var logger = log.New(os.Stderr, "", log.Lshortfile)
-
 func main() {
 	var socket common.Socket
 	var err error

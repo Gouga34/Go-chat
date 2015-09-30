@@ -1,7 +1,6 @@
 package common
 
 import (
-	"log"
 	"net"
 )
 
@@ -16,7 +15,7 @@ func (s *Socket) Listen(protocol string, port string) {
 	var err error
 	s.listener, err = net.Listen(protocol, port)
 	if err != nil {
-		log.Fatal(err)
+		Fatal("(*Socket) Listen", err)
 	}
 }
 
@@ -24,7 +23,7 @@ func (s *Socket) Listen(protocol string, port string) {
 func (s *Socket) CloseListener() {
 	err := s.listener.Close()
 	if err != nil {
-		log.Fatal(err)
+		Warning("(*Socket) CloseListener", err)
 	}
 }
 
@@ -33,7 +32,7 @@ func (s *Socket) Accept() int {
 
 	newClient, err := s.listener.Accept()
 	if err != nil {
-		log.Fatal(err)
+		Error("(*Socket) Accept", err)
 	}
 	num := len(s.clients)
 	s.clients = append(s.clients, newClient)
@@ -42,13 +41,14 @@ func (s *Socket) Accept() int {
 }
 
 //Read permet de lire un message. retourne le message sous la forme de string
-func (s *Socket) Read(numClient int) string {
+func (s *Socket) Read(numClient int) (string, error) {
 	message := make([]byte, 500)
 	nbRead, errRead := s.clients[numClient].Read(message)
 	if errRead != nil {
-		log.Fatal(errRead)
+		Warning("(*Socket) Read", errRead)
 	}
-	return string(message[:nbRead])
+
+	return string(message[:nbRead]), errRead
 }
 
 //Write permet d'envoyer un message. Le message pris en paramètre doit être un string
@@ -56,7 +56,7 @@ func (s *Socket) Write(numClient int, message string) {
 	toSend := []byte(message)
 	_, err := s.clients[numClient].Write(toSend)
 	if err != nil {
-		log.Fatal(err)
+		Warning("(*Socket) Write", err)
 	}
 }
 
@@ -68,7 +68,7 @@ func (s *Socket) CloseConnection(numClient int) {
 
 	err := client.Close()
 	if err != nil {
-		log.Fatal(err)
+		Error("(*Socket) CloseConnection", err)
 	}
 }
 
@@ -76,7 +76,7 @@ func (s *Socket) CloseConnection(numClient int) {
 func (s *Socket) Connect(protocol string, host string, port string) int {
 	conn, err := net.Dial(protocol, host+port)
 	if err != nil {
-		log.Fatal(err)
+		Error("(*Socket) Connect", err)
 	}
 	num := len(s.clients)
 	s.clients = append(s.clients, conn)
