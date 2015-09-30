@@ -35,19 +35,20 @@ func (s *Socket) Accept() int {
 	if err != nil {
 		log.Fatal(err)
 	}
+	num := len(s.clients)
 	s.clients = append(s.clients, newClient)
 
-	return len(s.clients)
+	return num
 }
 
 //Read permet de lire un message. retourne le message sous la forme de string
 func (s *Socket) Read(numClient int) string {
 	message := make([]byte, 500)
-	_, errRead := s.clients[numClient].Read(message)
+	nbRead, errRead := s.clients[numClient].Read(message)
 	if errRead != nil {
 		log.Fatal(errRead)
 	}
-	return string(message)
+	return string(message[:nbRead])
 }
 
 //Write permet d'envoyer un message. Le message pris en paramètre doit être un string
@@ -77,7 +78,8 @@ func (s *Socket) Connect(protocol string, host string, port string) int {
 	if err != nil {
 		log.Fatal(err)
 	}
+	num := len(s.clients)
 	s.clients = append(s.clients, conn)
 
-	return len(s.clients)
+	return num
 }

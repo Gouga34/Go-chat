@@ -15,7 +15,7 @@ func main() {
 	var socket common.Socket
 	var err error
 
-	socket.Connect(common.PROTOCOL, common.HOST, common.PORT)
+	numServer := socket.Connect(common.PROTOCOL, common.HOST, common.PORT)
 
 	fmt.Println("Connected to the server")
 
@@ -30,8 +30,8 @@ func main() {
 		}
 
 		message = strings.Split(message, "\n")[0]
-		socket.Write(message)
+		socket.Write(numServer, message)
 	}
 
-	socket.CloseConnection()
+	socket.CloseConnection(numServer)
 }

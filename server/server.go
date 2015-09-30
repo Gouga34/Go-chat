@@ -3,7 +3,24 @@ package main
 import (
 	"fmt"
 	"projet/common"
+	"strings"
 )
+
+func clientTreatment(socket common.Socket, numClient int) {
+
+	clientServerDialog(socket, numClient)
+	socket.CloseConnection(numClient)
+	fmt.Println("Client disconnected")
+}
+
+func clientServerDialog(socket common.Socket, numClient int) {
+
+	for receivedMessage := ""; strings.Compare(receivedMessage, "quit") != 0; {
+		receivedMessage = socket.Read(numClient)
+		fmt.Printf("New message : %s\n", receivedMessage)
+	}
+
+}
 
 func main() {
 	fmt.Println("Server is running...")
@@ -14,16 +31,11 @@ func main() {
 
 	for {
 		// Wait for a connection.
-		socket.Accept()
+		numClient := socket.Accept()
 
 		fmt.Println("New client")
+		go clientTreatment(socket, numClient)
 
-		for receivedMessage := ""; receivedMessage != "quit"; {
-			receivedMessage = socket.Read()
-			fmt.Printf("New message : %s\n", receivedMessage)
-		}
-
-		socket.CloseConnection()
 	}
 
 	//socket.CloseListener()
