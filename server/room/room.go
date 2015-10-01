@@ -7,7 +7,13 @@ import (
 //Room représente une salle de chat
 type Room struct {
 	name  string
-	users map[string]common.User
+	users map[string]*common.User
+}
+
+//Init initialise la nouvelle salle
+func (room *Room) Init(name string) {
+	room.name = name
+	room.users = make(map[string]*common.User)
 }
 
 //NumberOfUsers retourne le nombre d'utilisateurs dans la salle
@@ -16,11 +22,11 @@ func (room *Room) NumberOfUsers() int {
 }
 
 //AddUser ajoute un utilisateur à la salle de chat
-func (room *Room) AddUser(user common.User) {
+func (room *Room) AddUser(user *common.User) {
 	room.users[user.Login] = user
 }
 
 //RemoveUser retire un utilsateur de la salle de chat
-func (room *Room) RemoveUser(user common.User) {
+func (room *Room) RemoveUser(user *common.User) {
 	delete(room.users, user.Login)
 }

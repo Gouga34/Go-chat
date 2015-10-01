@@ -1,4 +1,4 @@
-COMMON_FILES = common/socket.go common/constants.go
+COMMON_FILES = common/socket.go common/constants.go server/room/*.go common/user.go
 
 all: serverChat clientChat
 
