@@ -1,46 +1,63 @@
 package main
 
 import (
-	"fmt"
+	"github.com/julienschmidt/httprouter"
+	"html/template"
 	"io"
+	"log"
+	"net/http"
 	"projet/common"
-	"strings"
 )
 
-func clientTreatment(socket common.Socket, numClient int) {
-	clientServerDialog(socket, numClient)
-	socket.CloseConnection(numClient)
-	fmt.Println("Client disconnected")
+// SendWebPage Retourne la page passée en paramètre au client
+func SendWebPage(w io.Writer, pageName string, data interface{}) {
+
+	var err error
+	t := template.New("app")
+
+	pageFile := pageName + ".html"
+
+	t, err = t.ParseFiles("client/" + pageFile)
+	if err != nil {
+		log.Println("Erreur lors de la lecture de la page ", pageName, " : ", err)
+		return
+	}
+
+	err = t.ExecuteTemplate(w, pageFile, data)
+	if err != nil {
+		log.Println("Erreur lors de l'exécution du template ", err)
+	}
 }
 
-func clientServerDialog(socket common.Socket, numClient int) {
-	var err error
+// ChatHandler Affiche la page de chat
+func ChatHandler(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 
-	for receivedMessage := ""; strings.Compare(receivedMessage, "quit") != 0; {
-		receivedMessage, err = socket.Read(numClient)
-		if err == io.EOF {
-			break
-		}
-
-		fmt.Printf("New message : %s\n", receivedMessage)
+	if r.URL.Path != "/chat" {
+		NotFoundHandler(w, r, params)
+		return
 	}
+
+	SendWebPage(w, "index", nil)
+}
+
+// NotFoundHandler Appelé lorsque l'url du client est incorrecte. Retourne une page 404.
+func NotFoundHandler(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	SendWebPage(w, "404", nil)
 }
 
 func main() {
-	fmt.Println("Server is running...")
+	log.Println("Server is running...")
 
-	var socket common.Socket
+	/* Création d'un routeur */
+	router := httprouter.New()
+	router.GET("/", NotFoundHandler)
+	router.GET("/chat", ChatHandler)
+	router.GET("/chat/:filePath", ChatHandler)
 
-	socket.Listen(common.PROTOCOL, common.PORT)
+	http.Handle("/", router)
 
-	for {
-		// Wait for a connection.
-		numClient := socket.Accept()
-
-		fmt.Println("New client")
-		go clientTreatment(socket, numClient)
-
+	err := http.ListenAndServe(common.PORT, nil)
+	if err != nil {
+		log.Fatal("ListenAndServe: ", err)
 	}
-
-	//socket.CloseListener()
 }
