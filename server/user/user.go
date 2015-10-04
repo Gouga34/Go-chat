@@ -5,11 +5,12 @@ import (
 	"projet/common"
 )
 
+// User Représente un utilisateur
 type User struct {
 	login    string
 	password string
 	mail     string
-	room     *room.Room
+	room     string
 	ws       *websocket.Conn
 }
 
@@ -19,7 +20,7 @@ func (u *User) Read() (string, error) {
 	nbRead, errRead := u.ws.Read(message)
 
 	if errRead != nil {
-		Warning("(*User) Read", errRead)
+		common.Warning("(*User) Read", errRead)
 	}
 
 	return string(message[:nbRead]), errRead
@@ -31,7 +32,7 @@ func (u *User) Write(message string) {
 	_, err := u.ws.Write(messageToSend)
 
 	if err != nil {
-		Warning("(*User) Write", err)
+		common.Warning("(*User) Write", err)
 	}
 
 }

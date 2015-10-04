@@ -1,13 +1,13 @@
 package room
 
 import (
-	"projet/common"
+	"projet/server/user"
 )
 
 //Room représente une salle de chat
 type Room struct {
 	name  string
-	users map[string]*common.User
+	users map[string]*user.User
 }
 
 //Init initialise la nouvelle salle
