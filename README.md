@@ -28,7 +28,9 @@ go get golang.org/x/net/websocket
 #### Installation
 
 * Récupérer les sources du projet : https://gitlab.info-ufr.univ-montp2.fr/HMIN302/go-viducha
+
 * Se placer dans le dossier du projet
+
 * Lancer la compilation
 ```bash
 make
