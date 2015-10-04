@@ -13,7 +13,7 @@
 
 ### Lancer l'application
 
-####Pré-requis
+#### Pré-requis
 
 * Package httprouter
 ```bash
@@ -25,7 +25,7 @@ go get github.com/julienschmidt/httprouter
 go get golang.org/x/net/websocket
 ```
 
-####Installation
+#### Installation
 
 * Récupérer les sources du projet : https://gitlab.info-ufr.univ-montp2.fr/HMIN302/go-viducha
 * Se placer dans le dossier du projet
@@ -33,7 +33,8 @@ go get golang.org/x/net/websocket
 ```bash
 make
 ```
-####Utilisation
+
+#### Utilisation
 
 * Lancement du serveur
 ```bash
