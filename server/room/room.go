@@ -23,10 +23,17 @@ func (room *Room) NumberOfUsers() int {
 
 //AddUser ajoute un utilisateur à la salle de chat
 func (room *Room) AddUser(user *user.User) {
-	room.users[user.Login] = user
+	room.users[user.GetLogin()] = user
 }
 
 //RemoveUser retire un utilsateur de la salle de chat
 func (room *Room) RemoveUser(user *user.User) {
-	delete(room.users, user.Login)
+	delete(room.users, user.GetLogin())
+}
+
+//GetUser retourne l'utilisateur s'il est dans la salle, nil sinon
+func (room *Room) GetUser(login string) *user.User {
+	u, _ := room.users[login]
+
+	return u
 }

@@ -20,6 +20,12 @@ func CreateUser(login string, password string, mail string) *User {
 	return u
 }
 
+//GetLogin retourne le login de l'utilisateur
+func (u *User) GetLogin() string {
+	return u.login
+}
+
+//Read lis un message reçu par l'utilisateur
 func (u *User) Read() (string, error) {
 
 	message := make([]byte, 500)
@@ -32,6 +38,7 @@ func (u *User) Read() (string, error) {
 	return string(message[:nbRead]), errRead
 }
 
+//Write écrit un message
 func (u *User) Write(message string) {
 
 	messageToSend := []byte(message)

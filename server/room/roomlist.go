@@ -1,7 +1,8 @@
 package room
 
 import (
-	"projet/common"
+	"errors"
+	"projet/server/user"
 	"strconv"
 )
 
@@ -27,30 +28,55 @@ func (roomList *RoomList) ToString() string {
 }
 
 //AddRoom ajoute une nouvelle salle à la liste
-func (roomList *RoomList) AddRoom(roomName string) {
+func (roomList *RoomList) AddRoom(roomName string) error {
+	var err error
 	_, exist := roomList.rooms[roomName]
 	if !exist {
-		var roomUsers map[string]*common.User
+		var roomUsers map[string]*user.User
 		roomList.rooms[roomName] = &Room{roomName, roomUsers}
+		roomList.rooms[roomName].Init(roomName)
+	} else {
+		err = errors.New("AddUserInRoom - La salle existe déjà")
 	}
+	return err
 }
 
 //RemoveRoom supprime la salle de la liste
-func (roomList *RoomList) RemoveRoom(roomName string) {
+func (roomList *RoomList) RemoveRoom(roomName string) error {
+	var err error
 	if len(roomList.rooms[roomName].users) == 0 {
 		delete(roomList.rooms, roomName)
+	} else {
+		err = errors.New("RemoveRoom - Il y a encore un user connecté à la salle")
 	}
+	return err
 }
 
 //AddUserInRoom ajoute l'utilisateur dans la salle
-func (roomList *RoomList) AddUserInRoom(user common.User, roomName string) {
-	_, exist := roomList.rooms[roomName].users[user.Login]
-	if !exist {
-		roomList.rooms[roomName].AddUser(&user)
+func (roomList *RoomList) AddUserInRoom(us user.User, roomName string) error {
+	var err error
+	if roomList.GetUsersRoom(us.GetLogin()) != nil {
+		u := roomList.rooms[roomName].GetUser(us.GetLogin())
+		if u == nil {
+			roomList.rooms[roomName].AddUser(&us)
+		}
+	} else {
+		err = errors.New("AddUserInRoom - l'utilisateur est déjà dans une autre salle")
 	}
+	return err
 }
 
 //RemoveUserFromRoom supprime l'utilisateur de la salle
-func (roomList *RoomList) RemoveUserFromRoom(user common.User, roomName string) {
+func (roomList *RoomList) RemoveUserFromRoom(user user.User, roomName string) {
 	roomList.rooms[roomName].RemoveUser(&user)
+}
+
+//GetUsersRoom Récupère la room dans laquelle l'utilisateur est (nil si pas de room)
+func (roomList *RoomList) GetUsersRoom(loginUser string) *Room {
+	for _, value := range roomList.rooms {
+		if value.GetUser(loginUser) != nil {
+			return value
+		}
+	}
+	return nil
 }
