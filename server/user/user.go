@@ -14,6 +14,12 @@ type User struct {
 	ws       *websocket.Conn
 }
 
+// CreateUser Créé un objet utilisateur et le retourne
+func CreateUser(login string, password string, mail string) *User {
+	u := &User{login, password, mail, "", nil}
+	return u
+}
+
 func (u *User) Read() (string, error) {
 
 	message := make([]byte, 500)

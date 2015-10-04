@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"projet/common"
 	"projet/server/user"
 )
 
@@ -20,7 +21,7 @@ type Server struct {
 
 // Init Créé la map de clients
 func (server *Server) Init() {
-	server.clients = make(map[string]*common.User)
+	server.clients = make(map[string]*user.User)
 }
 
 // Listen Permet au serveur d'écouter un port. Arrête tout si erreur levée. Le port doit être de la forme ":1200"
@@ -41,12 +42,12 @@ func (server *Server) CreateRouter() {
 }
 
 // AddClient Ajoute un client dans la liste
-func (server *Server) AddClient(userName string) error {
+func (server *Server) AddClient(userName string, userPassword string, userMail string) error {
 	var err error
 
 	_, exist := server.clients[userName]
 	if !exist {
-		server.clients[userName] = &common.User{userName}
+		server.clients[userName] = user.CreateUser(userName, userPassword, userMail)
 	} else {
 		err = errors.New("Le client existe déjà")
 	}
@@ -63,7 +64,7 @@ func (server *Server) RemoveClient(userName string) {
 func (server *Server) ReadMessageFromUser(userName string) (string, error) {
 	client, exist := server.clients[userName]
 	if exist {
-		return server.clients[userName].Read()
+		return client.Read()
 	}
 
 	return "", errors.New(ClientNotFoundErr)
@@ -75,7 +76,7 @@ func (server *Server) WriteMessageFromUser(userName string, message string) erro
 
 	client, exist := server.clients[userName]
 	if exist {
-		server.clients[userName].Write(message)
+		client.Write(message)
 	} else {
 		err = errors.New(ClientNotFoundErr)
 	}
