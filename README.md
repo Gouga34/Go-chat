@@ -13,21 +13,36 @@
 
 ### Lancer l'application
 
-* Réupérer les sources du projet : https://gitlab.info-ufr.univ-montp2.fr/HMIN302/go-viducha
+####Pré-requis
+
+* Package httprouter
+```bash
+go get github.com/julienschmidt/httprouter
+```
+
+* Package websocket
+```bash
+go get golang.org/x/net/websocket
+```
+
+####Installation
+
+* Récupérer les sources du projet : https://gitlab.info-ufr.univ-montp2.fr/HMIN302/go-viducha
 * Se placer dans le dossier du projet
 * Lancer la compilation
 ```bash
 make
 ```
+####Utilisation
 
 * Lancement du serveur
 ```bash
 ./serverChat
 ```
 
-* Lancement du client
+* Client
 ```bash
-./clientChat
+http://localhost:1200/
 ```
 
 ---
