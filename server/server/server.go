@@ -5,14 +5,10 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"html/template"
 	"io"
-	"log"
 	"net/http"
-	"projet/common"
+	"projet/server/logger"
 	"projet/server/user"
 )
-
-// Client non présent dans la liste
-const ClientNotFoundErr = "Client inexistant"
 
 // Server Représente un objet server avec la liste des clients
 type Server struct {
@@ -28,7 +24,7 @@ func (server *Server) Init() {
 func (server *Server) Listen(port string) {
 	err := http.ListenAndServe(port, nil)
 	if err != nil {
-		common.Fatal("(*Server) ListenAndServe ", err)
+		logger.Fatal("(*Server) ListenAndServe ", err)
 	}
 }
 
@@ -93,13 +89,13 @@ func (server *Server) sendWebPage(w io.Writer, pageName string, data interface{}
 
 	t, err = t.ParseFiles("client/" + pageFile)
 	if err != nil {
-		log.Println("Erreur lors de la lecture de la page ", pageName, " : ", err)
+		logger.Warning("Erreur lors de la lecture de la page "+pageName+" : ", err)
 		return
 	}
 
 	err = t.ExecuteTemplate(w, pageFile, data)
 	if err != nil {
-		log.Println("Erreur lors de l'exécution du template ", err)
+		logger.Warning("Erreur lors de l'exécution du template ", err)
 	}
 }
 

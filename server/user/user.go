@@ -2,7 +2,7 @@ package user
 
 import (
 	"golang.org/x/net/websocket"
-	"projet/common"
+	"projet/server/logger"
 )
 
 // User Représente un utilisateur
@@ -32,7 +32,7 @@ func (u *User) Read() (string, error) {
 	nbRead, errRead := u.ws.Read(message)
 
 	if errRead != nil {
-		common.Warning("(*User) Read", errRead)
+		logger.Warning("(*User) Read", errRead)
 	}
 
 	return string(message[:nbRead]), errRead
@@ -45,7 +45,7 @@ func (u *User) Write(message string) {
 	_, err := u.ws.Write(messageToSend)
 
 	if err != nil {
-		common.Warning("(*User) Write", err)
+		logger.Warning("(*User) Write", err)
 	}
 
 }
