@@ -15,14 +15,9 @@
 
 #### Pré-requis
 
-* Package httprouter
+* Package websocket io
 ```bash
-go get github.com/julienschmidt/httprouter
-```
-
-* Package websocket
-```bash
-go get golang.org/x/net/websocket
+github.com/googollee/go-socket.io
 ```
 
 #### Installation
@@ -45,7 +40,7 @@ make
 
 * Client
 ```bash
-http://localhost:1200/
+http://localhost:5000/
 ```
 
 ---
