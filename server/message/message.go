@@ -3,14 +3,17 @@ package message
 import (
 	"encoding/json"
 	"projet/server/logger"
-	"time"
 )
 
 // Message Représente un message entre client et serveur
 type Message struct {
 	content string
 	author  string
-	time    time.Time
+	time    string
+}
+
+func (message *Message) GetTime() string {
+	return message.time
 }
 
 // GetMessageObject Retourne l'objet Message à partir du message reçu par un client

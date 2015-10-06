@@ -7,10 +7,10 @@ import (
 
 // User Représente un utilisateur
 type User struct {
-	login    string
-	password string
-	mail     string
-	room     string
+	Login    string
+	Password string
+	Mail     string
+	Room     string
 	ws       *websocket.Conn
 }
 
@@ -22,7 +22,7 @@ func CreateUser(login string, password string, mail string) *User {
 
 //GetLogin retourne le login de l'utilisateur
 func (u *User) GetLogin() string {
-	return u.login
+	return u.Login
 }
 
 //Read lis un message reçu par l'utilisateur

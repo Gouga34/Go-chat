@@ -10,6 +10,10 @@ type Room struct {
 	users map[string]*user.User
 }
 
+func (room *Room) getName() string {
+	return room.name
+}
+
 //Init initialise la nouvelle salle
 func (room *Room) Init(name string) {
 	room.name = name

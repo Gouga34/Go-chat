@@ -6,12 +6,6 @@ import (
 	"log"
 )
 
-type User struct {
-	Login    string
-	Password string
-	Mail     string
-}
-
 func connecxion() (*bolt.DB, error) {
 	db, err := bolt.Open("user.db", 0600, nil)
 	if err != nil {
