@@ -1,0 +1,22 @@
+.ui.fluid.action {
+    margin-top: 20px;
+}
+#listComments {
+    height: 400px;
+    overflow-y: scroll;
+}
+.ui.menu:first-child {
+    margin-top: 10px;
+}
+#content {
+    margin-top: 15px;
+}
+#listRooms .label {
+    margin-right: 5px;
+}
+#listRooms .content.room {
+    padding-top: 4px;
+}
+#listRooms .item.addRoom {
+    padding-top: 20px;
+}
