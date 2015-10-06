@@ -7,9 +7,9 @@ import (
 )
 
 type User struct {
-	login    string
-	password string
-	mail     string
+	Login    string
+	Password string
+	Mail     string
 }
 
 func connecxion() (*bolt.DB, error) {
@@ -31,22 +31,37 @@ func addUser(db *bolt.DB, u User) {
 			return err
 		}
 		encoded, err := json.Marshal(u)
+
 		if err != nil {
 			return err
 		}
-		return b.Put([]byte(u.login), encoded)
+		return b.Put([]byte(u.Login), encoded)
 	})
+}
+
+func getUser(db *bolt.DB, cle string) (u User) {
+	db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("users"))
+		v := b.Get([]byte(cle))
+		json.Unmarshal(v, &u)
+		return nil
+	})
+	return
 }
 
 // func main() {
 //
 // 	u := &User{
-// 		login:    "azerty",
-// 		password: "azerty1",
-// 		mail:     "azerty@aol.com"}
+// 		Login:    "azerty",
+// 		Password: "azerty1",
+// 		Mail:     "azerty@aol.com"}
 //
 // 	db, _ := connecxion()
 // 	addUser(db, *u)
+// 	res := getUser(db, "azerty")
+//
+// 	fmt.Println(res)
+//
 // 	deconnecxion(db)
 //
 // }
