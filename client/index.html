@@ -15,18 +15,20 @@
         socket.on('connect', function() {});
 
         socket.on('message', function(data){
+          data=JSON.parse(data);
+          var time = new Date(data.time);
           document.getElementById('listComments').innerHTML +=
           "<div class=\"comment\">"
               +"<a class=\"avatar\">"
                   +"<img src=\"https://gitlab.info-ufr.univ-montp2.fr/uploads/user/avatar/670/entei.png\">"
               +"</a>"
               +"<div class=\"content\">"
-                  +"<a class=\"author\">Manuel</a>"
+                  +"<a class=\"author\">"+data.author+"</a>"
                   +"<div class=\"metadata\">"
-                      +"<span class=\"date\">Hier à 5h42</span>"
+                      +"<span class=\"date\">"+time.toDateString()+" "+time.getHours()+"h"+time.getMinutes()+"</span>"
                   +"</div>"
                   +"<div class=\"text\">"
-                    + data
+                    + data.content
                   +"</div>"
               +"</div>"
           +"</div>";
@@ -35,9 +37,32 @@
 
         socket.on('disconnect', function(){});
 
+        socket.on('changeRoom', function(data){
+
+        })
+
         function senddata() {
            var data = document.getElementById('textToSend').value;
-           socket.emit('message', data);
+           var messageToSend={content:data, author:"Auteur", time: Date.now()};
+           var serializedMessage = JSON.stringify(messageToSend);
+           socket.emit('message', serializedMessage);
+        }
+
+        function changeRoom(data){
+          socket.emit("changeRoom", data);
+        }
+
+        function createRoom(){
+          socket.emit("changeRoom", document.getElementById('newRoom').value);
+          document.getElementById('listRooms').removeChild(document.getElementById('addRoom'));
+        }
+
+        function getRoomCreationForm(){
+          document.getElementById('listRooms').innerHTML+=
+          "<div class=\"ui fluid action input\" id=\"addRoom\">"
+                +"<input id=\"newRoom\" type=\"text\" placeholder=\"Nom de la salle\">"
+                +"<div class=\"ui button teal\" onclick=\"createRoom()\"><i class=\"send icon\" ></i>Créer</div>"
+            +"</div>";
         }
       </script>
 <body>
@@ -63,18 +88,18 @@
                             <strong>Defaut</strong>
                         </div>
                     </div>
-                    <div class="item">
+                    <div class="item" >
                         <div class="right floated content">
-                            <div class="ui button tiny gray">Rejoindre<i class="chevron circle right icon"></i></div>
+                            <div class="ui button tiny gray" onclick="changeRoom('Room 1')">Rejoindre<i class="chevron circle right icon"></i></div>
                         </div>
                         <div class="content room">
-                            <div class="ui label teal circular">5</div>
+                            <div class="ui label teal circular" >5</div>
                             Room 1
                         </div>
                     </div>
                     <div class="item">
                         <div class="right floated content">
-                            <div class="ui button tiny gray">Rejoindre<i class="chevron circle right icon"></i></div>
+                            <div class="ui button tiny gray" onclick="changeRoom('Room 2')">Rejoindre<i class="chevron circle right icon"></i></div>
                         </div>
                         <div class="content room">
                             <div class="ui label teal circular">2</div>
@@ -82,7 +107,7 @@
                         </div>
                     </div>
                     <div class="item addRoom">
-                        <div class="ui button teal animated fade fluid tiny">
+                        <div class="ui button teal animated fade fluid tiny" onclick="getRoomCreationForm()">
                             <div class="visible content"><i class="add icon"></i></div>
                             <div class="hidden content">
                                 Créer un salon
