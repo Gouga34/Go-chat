@@ -1,4 +1,4 @@
-package server
+package constants
 
 //PROTOCOL : protocole de communication
 const PROTOCOL = "tcp"

@@ -1,32 +1,200 @@
 <!DOCTYPE html>
 <html>
-    <head>
-      <title>Chat ViDuCha</title>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
 
-      <script src="https://cdn.socket.io/socket.io-1.3.7.js"></script>
-      <script>
+    <link rel="stylesheet" type="text/css" class="ui" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.4/semantic.min.css">
+    <link rel="stylesheet" type="text/css" class="ui" href="assets/css/style.css">
+    <script src="https://cdn.socket.io/socket.io-1.3.7.js"></script>
+</head>
+<script>
         var socket = io();
 
         socket.on('connect', function() {});
 
         socket.on('message', function(data){
-          document.getElementById('messages').innerHTML += "<p>" + data + "</p>";
+          data=JSON.parse(data);
+          var time = new Date(data.time);
+          document.getElementById('listComments').innerHTML +=
+          "<div class=\"comment\">"
+              +"<a class=\"avatar\">"
+                  +"<img src=\"https://gitlab.info-ufr.univ-montp2.fr/uploads/user/avatar/670/entei.png\">"
+              +"</a>"
+              +"<div class=\"content\">"
+                  +"<a class=\"author\">"+data.author+"</a>"
+                  +"<div class=\"metadata\">"
+                      +"<span class=\"date\">"+time.toDateString()+" "+time.getHours()+"h"+time.getMinutes()+"</span>"
+                  +"</div>"
+                  +"<div class=\"text\">"
+                    + data.content
+                  +"</div>"
+              +"</div>"
+          +"</div>";
         });
+
 
         socket.on('disconnect', function(){});
 
+        socket.on('changeRoom', function(data){
+
+        })
+
         function senddata() {
-           var data = document.getElementById('sendText').value;
-           socket.emit('message', data);
+           var data = document.getElementById('textToSend').value;
+           var messageToSend={content:data, author:"Auteur", time: Date.now()};
+           var serializedMessage = JSON.stringify(messageToSend);
+           socket.emit('message', serializedMessage);
+        }
+
+        function changeRoom(data){
+          socket.emit("changeRoom", data);
+        }
+
+        function createRoom(){
+          socket.emit("changeRoom", document.getElementById('newRoom').value);
+          document.getElementById('listRooms').removeChild(document.getElementById('addRoom'));
+        }
+
+        function getRoomCreationForm(){
+          document.getElementById('listRooms').innerHTML+=
+          "<div class=\"ui fluid action input\" id=\"addRoom\">"
+                +"<input id=\"newRoom\" type=\"text\" placeholder=\"Nom de la salle\">"
+                +"<div class=\"ui button teal\" onclick=\"createRoom()\"><i class=\"send icon\" ></i>Créer</div>"
+            +"</div>";
         }
       </script>
-    </head>
-    <body>
-        <p>Bienvenue sur le chat !</p>
+<body>
 
-        <div id="messages"></div>
+    <div class="ui container main">
 
-        <input type="text" id="sendText" />
-        <input type="button" id="sendButton" value="Envoyer" onclick="senddata()"/>
-    </body>
+        <div class="ui inverted menu">
+            <a class="item">Accueil<a>
+            <a class="item">Mon profil</a>
+            <a class="active item">Chat</a>
+        </div>
+
+        <div class="ui grid" id="content">
+            <div class="four wide column stackable" id="listRooms">
+                <div class="ui header">Liste des salons</div>
+                <div class="ui middle aligned divided list">
+                    <div class="item">
+                        <div class="right floated content">
+                            <div class="ui button tiny teal disabled">Connecté</div>
+                        </div>
+                        <div class="content room">
+                            <div class="ui label teal circular">23</div>
+                            <strong>Defaut</strong>
+                        </div>
+                    </div>
+                    <div class="item" >
+                        <div class="right floated content">
+                            <div class="ui button tiny gray" onclick="changeRoom('Room 1')">Rejoindre<i class="chevron circle right icon"></i></div>
+                        </div>
+                        <div class="content room">
+                            <div class="ui label teal circular" >5</div>
+                            Room 1
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="right floated content">
+                            <div class="ui button tiny gray" onclick="changeRoom('Room 2')">Rejoindre<i class="chevron circle right icon"></i></div>
+                        </div>
+                        <div class="content room">
+                            <div class="ui label teal circular">2</div>
+                            Room 2
+                        </div>
+                    </div>
+                    <div class="item addRoom">
+                        <div class="ui button teal animated fade fluid tiny" onclick="getRoomCreationForm()">
+                            <div class="visible content"><i class="add icon"></i></div>
+                            <div class="hidden content">
+                                Créer un salon
+                              </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="height wide column stackable">
+                <div class="ui comments">
+                    <h3 class="ui dividing header">Chat</h3>
+                    <div id="listComments">
+                        <div class="comment">
+                            <a class="avatar">
+                                <img src="https://gitlab.info-ufr.univ-montp2.fr/uploads/user/avatar/670/entei.png">
+                            </a>
+                            <div class="content">
+                                <a class="author">Manuel</a>
+                                <div class="metadata">
+                                    <span class="date">Hier à 5h42</span>
+                                </div>
+                                <div class="text">
+                                    How artistic!
+                                </div>
+                            </div>
+                        </div>
+                        <div class="comment">
+                            <a class="avatar">
+                                <img src="https://gitlab.info-ufr.univ-montp2.fr/uploads/user/avatar/670/entei.png">
+                            </a>
+                            <div class="content">
+                                <a class="author">Manuel</a>
+                                <div class="metadata">
+                                    <span class="date">Il y a 14 minutes</span>
+                                </div>
+                                <div class="text">
+                                    <p>This has been very useful for my research. Thanks as well!</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="comment">
+                            <a class="avatar">
+                                <img src="https://gitlab.info-ufr.univ-montp2.fr/uploads/user/avatar/670/entei.png">
+                            </a>
+                            <div class="content">
+                                <a class="author">Manuel</a>
+                                <div class="metadata">
+                                    <span class="date">À l'instant</span>
+                                </div>
+                                <div class="text">
+                                    Dude, this is awesome. Thanks so much
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ui fluid action input">
+                        <input id="textToSend" type="text" placeholder="Entrez votre message...">
+                        <div class="ui button teal" onclick="senddata()"><i class="send icon" ></i>Envoyer</div>
+                    </div>
+                </div>
+            </div>
+            <div class="four wide column stackable">
+                <div class="ui header">Utilisateurs</div>
+                <div class="ui list">
+                    <div class="item">
+                        <img class="ui avatar image" src="https://gitlab.info-ufr.univ-montp2.fr/uploads/user/avatar/670/entei.png">
+                        <div class="content">
+                            <a class="header">Manuel</a>
+                            <div class="description">En ligne</div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <img class="ui avatar image" src="https://avatars2.githubusercontent.com/u/6512917?v=3&s=460">
+                        <div class="content">
+                            <a class="header">Morgane</a>
+                            <div class="description">En ligne</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+<script type="text/javascript" src="assets/vendor/jquery.js"></script>
+<script type="text/javascript" src="assets/vendor/semantic.min.js"></script>
+<script type="text/javascript" src="assets/js/init.js"></script>
+
 </html>
