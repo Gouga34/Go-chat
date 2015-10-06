@@ -4,6 +4,8 @@ import (
 	"github.com/googollee/go-socket.io"
 	"log"
 	"net/http"
+	"projet/server/constants"
+	"projet/server/message"
 )
 
 //CreateServer créé un nouveau serveur
@@ -25,6 +27,9 @@ func OnConnection(so socketio.Socket) {
 
 	so.On("message", func(msg string) {
 		log.Println(msg)
+
+		_ = message.GetMessageObject(msg)
+
 		so.Emit("message", msg)
 		so.BroadcastTo("chat", "message", msg)
 	})
@@ -63,5 +68,5 @@ func main() {
 
 	CreateHandler(server)
 	log.Println("Serving at localhost:5000...")
-	Listen(":5000")
+	Listen(constants.PORT)
 }
