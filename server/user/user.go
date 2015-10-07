@@ -20,11 +20,6 @@ func CreateUser(login string, password string, mail string) *User {
 	return u
 }
 
-//GetLogin retourne le login de l'utilisateur
-func (u *User) GetLogin() string {
-	return u.Login
-}
-
 //Read lis un message reçu par l'utilisateur
 func (u *User) Read() (string, error) {
 

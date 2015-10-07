@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"projet/server/constants"
 	"projet/server/message"
+	"projet/server/user"
 )
 
 //CreateServer créé un nouveau serveur
@@ -22,16 +23,27 @@ func CreateServer() *socketio.Server {
 func OnConnection(so socketio.Socket) {
 	log.Println("Client connection")
 
-	so.Join("chat")
+	var user user.User
+	user.Login = "loginServ"
+	room := "chat"
+
+	so.Join(room)
 	log.Println("Client join chat room")
 
 	so.On("message", func(msg string) {
 		log.Println(msg)
 
-		_ = message.GetMessageObject(msg)
+		message := message.GetMessageObject(msg)
+		message.SetAuthor(user.Login)
 
-		so.Emit("message", msg)
-		so.BroadcastTo("chat", "message", msg)
+		messageToBroadcast := message.ToString()
+		so.Emit("message", messageToBroadcast)
+		so.BroadcastTo(room, "message", messageToBroadcast)
+	})
+
+	so.On("changeRoom", func(msg string) {
+		room = msg
+		so.Join(room)
 	})
 
 	so.On("disconnection", func() {
@@ -67,6 +79,6 @@ func main() {
 	server := CreateAndInitServer()
 
 	CreateHandler(server)
-	log.Println("Serving at localhost:5000...")
+	log.Println("Serving at localhost" + constants.PORT + "...")
 	Listen(constants.PORT)
 }

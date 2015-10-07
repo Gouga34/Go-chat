@@ -12,14 +12,20 @@ type Message struct {
 	time    string
 }
 
+// GetTime Retourne la date du message
 func (message *Message) GetTime() string {
 	return message.time
 }
 
+// SetAuthor Change l'auteur du message
+func (message *Message) SetAuthor(author string) {
+	message.author = author
+}
+
 // GetMessageObject Retourne l'objet Message à partir du message reçu par un client
-func GetMessageObject(message string) *Message {
-	var chatMessage *Message
-	err := json.Unmarshal([]byte(message), chatMessage)
+func GetMessageObject(message string) Message {
+	var chatMessage Message
+	err := json.Unmarshal([]byte(message), &chatMessage)
 	if err != nil {
 		logger.Error("Erreur lors de la désérialisation d'un message", err)
 	}
