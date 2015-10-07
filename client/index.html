@@ -23,12 +23,12 @@
                   +"<img src=\"https://gitlab.info-ufr.univ-montp2.fr/uploads/user/avatar/670/entei.png\">"
               +"</a>"
               +"<div class=\"content\">"
-                  +"<a class=\"author\">"+data.author+"</a>"
+                  +"<a class=\"author\">"+data.Author+"</a>"
                   +"<div class=\"metadata\">"
-                      +"<span class=\"date\">"+time.toDateString()+" "+time.getHours()+"h"+time.getMinutes()+"</span>"
+                      +"<span class=\"date\">"+data.Time+"</span>"
                   +"</div>"
                   +"<div class=\"text\">"
-                    + data.content
+                    + data.Content
                   +"</div>"
               +"</div>"
           +"</div>";
@@ -37,24 +37,58 @@
 
         socket.on('disconnect', function(){});
 
-        socket.on('changeRoom', function(data){
-
-        })
-
         function senddata() {
            var data = document.getElementById('textToSend').value;
-           var messageToSend={content:data, author:"Auteur", time: Date.now()};
+           var time=new Date(Date.now());
+           var messageToSend={content:data, author:"", time: time.toDateString()+" "+time.getHours()+"h"+time.getMinutes()};
            var serializedMessage = JSON.stringify(messageToSend);
            socket.emit('message', serializedMessage);
         }
 
         function changeRoom(data){
           socket.emit("changeRoom", data);
+          //On vide la fenetre contenant la conversation:
+          document.getElementById('listComments').innerHTML="";
+
+          if(document.getElementById('listRooms').getElementsByClassName('ui button tiny gray') ==null){
+                document.getElementById('listRooms').innerHTML+="ttttttt";
+          }
+
+          var roomsConnection = document.getElementById('listRooms').getElementsByClassName('ui button tiny gray');
+          if(roomsConnection.length>0){
+            for (i=0; i<roomsConnection.length; i++){
+              roomsConnection[i].innerHTML='Rejoindre'
+            }
+          }
+
+          var roomConnected=  document.getElementById(data).getElementsByClassName('ui button tiny gray');
+          if(roomConnected.length>0){
+            roomConnected[0].innerHTML='Connecté';
+          }
+
+          if(data!="default"){
+            var defaultRoom=  document.getElementById("default").getElementsByClassName('ui button tiny teal disabled');
+            defaultRoom[0].innerHTML='Rejoindre';
+          }
         }
 
         function createRoom(){
-          socket.emit("changeRoom", document.getElementById('newRoom').value);
+          var roomName = document.getElementById('newRoom').value;
+
           document.getElementById('listRooms').removeChild(document.getElementById('addRoom'));
+
+          document.getElementById('listRooms').innerHTML +=
+          "<div class=\"item\" id=\""+roomName+"\" >"
+            +"<div class=\"right floated content\">"
+                +"<div class=\"ui button tiny gray\" onclick=\"changeRoom('"+roomName+"')\">Connecté</div>"
+              +"</div>"
+              +"<div class=\"content room\">"
+                  +"<div class=\"ui label teal circular\" >5</div>"
+                  +roomName
+              +"</div>"
+          +"</div>";
+          changeRoom(roomName);
+
         }
 
         function getRoomCreationForm(){
@@ -64,6 +98,8 @@
                 +"<div class=\"ui button teal\" onclick=\"createRoom()\"><i class=\"send icon\" ></i>Créer</div>"
             +"</div>";
         }
+
+
       </script>
 <body>
 
@@ -76,10 +112,10 @@
         </div>
 
         <div class="ui grid" id="content">
-            <div class="four wide column stackable" id="listRooms">
+            <div class="four wide column stackable">
                 <div class="ui header">Liste des salons</div>
-                <div class="ui middle aligned divided list">
-                    <div class="item">
+                <div class="ui middle aligned divided list"  id="listRooms">
+                    <div class="item" id="default">
                         <div class="right floated content">
                             <div class="ui button tiny teal disabled">Connecté</div>
                         </div>
@@ -88,31 +124,15 @@
                             <strong>Defaut</strong>
                         </div>
                     </div>
-                    <div class="item" >
-                        <div class="right floated content">
-                            <div class="ui button tiny gray" onclick="changeRoom('Room 1')">Rejoindre<i class="chevron circle right icon"></i></div>
-                        </div>
-                        <div class="content room">
-                            <div class="ui label teal circular" >5</div>
-                            Room 1
-                        </div>
-                    </div>
-                    <div class="item">
-                        <div class="right floated content">
-                            <div class="ui button tiny gray" onclick="changeRoom('Room 2')">Rejoindre<i class="chevron circle right icon"></i></div>
-                        </div>
-                        <div class="content room">
-                            <div class="ui label teal circular">2</div>
-                            Room 2
-                        </div>
-                    </div>
-                    <div class="item addRoom">
-                        <div class="ui button teal animated fade fluid tiny" onclick="getRoomCreationForm()">
-                            <div class="visible content"><i class="add icon"></i></div>
-                            <div class="hidden content">
-                                Créer un salon
-                              </div>
-                        </div>
+
+
+                </div>
+                <div class="item addRoom">
+                    <div class="ui button teal animated fade fluid tiny" onclick="getRoomCreationForm()">
+                        <div class="visible content"><i class="add icon"></i></div>
+                        <div class="hidden content">
+                            Créer un salon
+                          </div>
                     </div>
                 </div>
             </div>
@@ -120,48 +140,7 @@
                 <div class="ui comments">
                     <h3 class="ui dividing header">Chat</h3>
                     <div id="listComments">
-                        <div class="comment">
-                            <a class="avatar">
-                                <img src="https://gitlab.info-ufr.univ-montp2.fr/uploads/user/avatar/670/entei.png">
-                            </a>
-                            <div class="content">
-                                <a class="author">Manuel</a>
-                                <div class="metadata">
-                                    <span class="date">Hier à 5h42</span>
-                                </div>
-                                <div class="text">
-                                    How artistic!
-                                </div>
-                            </div>
-                        </div>
-                        <div class="comment">
-                            <a class="avatar">
-                                <img src="https://gitlab.info-ufr.univ-montp2.fr/uploads/user/avatar/670/entei.png">
-                            </a>
-                            <div class="content">
-                                <a class="author">Manuel</a>
-                                <div class="metadata">
-                                    <span class="date">Il y a 14 minutes</span>
-                                </div>
-                                <div class="text">
-                                    <p>This has been very useful for my research. Thanks as well!</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="comment">
-                            <a class="avatar">
-                                <img src="https://gitlab.info-ufr.univ-montp2.fr/uploads/user/avatar/670/entei.png">
-                            </a>
-                            <div class="content">
-                                <a class="author">Manuel</a>
-                                <div class="metadata">
-                                    <span class="date">À l'instant</span>
-                                </div>
-                                <div class="text">
-                                    Dude, this is awesome. Thanks so much
-                                </div>
-                            </div>
-                        </div>
+
                     </div>
                     <div class="ui fluid action input">
                         <input id="textToSend" type="text" placeholder="Entrez votre message...">
