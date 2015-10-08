@@ -43,6 +43,24 @@ func getUser(db *bolt.DB, cle string) (u User) {
 	return
 }
 
+func existUser(db *bolt.DB, cle string) bool {
+
+	var u User
+	var v []byte
+
+	db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("users"))
+		v = b.Get([]byte(cle))
+		json.Unmarshal(v, &u)
+		return nil
+	})
+	if v != nil {
+		return true
+	} else {
+		return false
+	}
+}
+
 // func main() {
 //
 // 	u := &User{

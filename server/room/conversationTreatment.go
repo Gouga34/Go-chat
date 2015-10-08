@@ -31,7 +31,7 @@ func addConv(db *bolt.DB, m message.Message) {
 
 func getConv(db *bolt.DB, cle string) (m message.Message) {
 	db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("users"))
+		b := tx.Bucket([]byte("convs"))
 		v := b.Get([]byte(cle))
 		message.GetMessageObject(string(v[:]))
 		return nil

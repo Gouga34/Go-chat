@@ -34,10 +34,28 @@ func addRoom(db *bolt.DB, roomName string) {
 
 func getRoom(db *bolt.DB, roomName string) (r Room) {
 	db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("users"))
+		b := tx.Bucket([]byte("rooms"))
 		v := b.Get([]byte(roomName))
 		json.Unmarshal(v, &r)
 		return nil
 	})
 	return
+}
+
+func existUser(db *bolt.DB, roomName string) bool {
+
+	var r Room
+	var v []byte
+
+	db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("rooms"))
+		v = b.Get([]byte(roomName))
+		json.Unmarshal(v, &r)
+		return nil
+	})
+	if v != nil {
+		return true
+	} else {
+		return false
+	}
 }
