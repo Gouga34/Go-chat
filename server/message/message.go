@@ -7,19 +7,19 @@ import (
 
 // Message Représente un message entre client et serveur
 type Message struct {
-	content string
-	author  string
-	time    string
+	Content string
+	Author  string
+	Time    string
 }
 
 // GetTime Retourne la date du message
 func (message *Message) GetTime() string {
-	return message.time
+	return message.Time
 }
 
 // SetAuthor Change l'auteur du message
 func (message *Message) SetAuthor(author string) {
-	message.author = author
+	message.Author = author
 }
 
 // GetMessageObject Retourne l'objet Message à partir du message reçu par un client
