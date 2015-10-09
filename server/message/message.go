@@ -5,26 +5,23 @@ import (
 	"projet/server/logger"
 )
 
-// Message Représente un message entre client et serveur
-type Message struct {
+// ReceiveMessage Représente un message reçu par le client
+type ReceiveMessage struct {
 	Content string
-	Author  string
 	Time    string
 }
 
-// GetTime Retourne la date du message
-func (message *Message) GetTime() string {
-	return message.Time
-}
-
-// SetAuthor Change l'auteur du message
-func (message *Message) SetAuthor(author string) {
-	message.Author = author
+// SendMessage Représente un message envoyé au client
+type SendMessage struct {
+	Content      string
+	Author       string
+	Time         string
+	GravatarLink string
 }
 
 // GetMessageObject Retourne l'objet Message à partir du message reçu par un client
-func GetMessageObject(message string) Message {
-	var chatMessage Message
+func GetMessageObject(message string) ReceiveMessage {
+	var chatMessage ReceiveMessage
 	err := json.Unmarshal([]byte(message), &chatMessage)
 	if err != nil {
 		logger.Error("Erreur lors de la désérialisation d'un message", err)
@@ -34,7 +31,7 @@ func GetMessageObject(message string) Message {
 }
 
 // ToString Convertit l'objet Message en string
-func (message *Message) ToString() string {
+func (message *SendMessage) ToString() string {
 	jsonContent, err := json.Marshal(message)
 	if err != nil {
 		logger.Error("Erreur lors de la sérialisation d'un message", err)

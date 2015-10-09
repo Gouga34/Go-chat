@@ -11,3 +11,6 @@ const HOST = "localhost"
 
 //ClientNotFoundErr non présent dans la liste
 const ClientNotFoundErr = "Client inexistant"
+
+//DefaultRoom salle de chat par défaut
+const DefaultRoom = "Defaut"
