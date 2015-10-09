@@ -4,103 +4,12 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
-
     <link rel="stylesheet" type="text/css" class="ui" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.4/semantic.min.css">
     <link rel="stylesheet" type="text/css" class="ui" href="assets/css/style.css">
     <script src="https://cdn.socket.io/socket.io-1.3.7.js"></script>
+    <script src="assets/js/interface.js"></script>
+    <script src="assets/js/communication.js"></script>
 </head>
-<script>
-        var socket = io();
-
-        socket.on('connect', function() {});
-
-        socket.on('message', function(data){
-          data=JSON.parse(data);
-          var time = new Date(data.time);
-          document.getElementById('listComments').innerHTML +=
-          "<div class=\"comment\">"
-              +"<a class=\"avatar\">"
-                  +"<img src=\"https://gitlab.info-ufr.univ-montp2.fr/uploads/user/avatar/670/entei.png\">"
-              +"</a>"
-              +"<div class=\"content\">"
-                  +"<a class=\"author\">"+data.Author+"</a>"
-                  +"<div class=\"metadata\">"
-                      +"<span class=\"date\">"+data.Time+"</span>"
-                  +"</div>"
-                  +"<div class=\"text\">"
-                    + data.Content
-                  +"</div>"
-              +"</div>"
-          +"</div>";
-        });
-
-
-        socket.on('disconnect', function(){});
-
-        function senddata() {
-           var data = document.getElementById('textToSend').value;
-           var time=new Date(Date.now());
-           var messageToSend={content:data, author:"", time: time.toDateString()+" "+time.getHours()+"h"+time.getMinutes()};
-           var serializedMessage = JSON.stringify(messageToSend);
-           socket.emit('message', serializedMessage);
-        }
-
-        function changeRoom(data){
-          socket.emit("changeRoom", data);
-          //On vide la fenetre contenant la conversation:
-          document.getElementById('listComments').innerHTML="";
-
-          if(document.getElementById('listRooms').getElementsByClassName('ui button tiny gray') ==null){
-                document.getElementById('listRooms').innerHTML+="ttttttt";
-          }
-
-          var roomsConnection = document.getElementById('listRooms').getElementsByClassName('ui button tiny gray');
-          if(roomsConnection.length>0){
-            for (i=0; i<roomsConnection.length; i++){
-              roomsConnection[i].innerHTML='Rejoindre'
-            }
-          }
-
-          var roomConnected=  document.getElementById(data).getElementsByClassName('ui button tiny gray');
-          if(roomConnected.length>0){
-            roomConnected[0].innerHTML='Connecté';
-          }
-
-          if(data!="default"){
-            var defaultRoom=  document.getElementById("default").getElementsByClassName('ui button tiny teal disabled');
-            defaultRoom[0].innerHTML='Rejoindre';
-          }
-        }
-
-        function createRoom(){
-          var roomName = document.getElementById('newRoom').value;
-
-          document.getElementById('listRooms').removeChild(document.getElementById('addRoom'));
-
-          document.getElementById('listRooms').innerHTML +=
-          "<div class=\"item\" id=\""+roomName+"\" >"
-            +"<div class=\"right floated content\">"
-                +"<div class=\"ui button tiny gray\" onclick=\"changeRoom('"+roomName+"')\">Connecté</div>"
-              +"</div>"
-              +"<div class=\"content room\">"
-                  +"<div class=\"ui label teal circular\" >5</div>"
-                  +roomName
-              +"</div>"
-          +"</div>";
-          changeRoom(roomName);
-
-        }
-
-        function getRoomCreationForm(){
-          document.getElementById('listRooms').innerHTML+=
-          "<div class=\"ui fluid action input\" id=\"addRoom\">"
-                +"<input id=\"newRoom\" type=\"text\" placeholder=\"Nom de la salle\">"
-                +"<div class=\"ui button teal\" onclick=\"createRoom()\"><i class=\"send icon\" ></i>Créer</div>"
-            +"</div>";
-        }
-
-
-      </script>
 <body>
 
     <div class="ui container main">
@@ -115,9 +24,9 @@
             <div class="four wide column stackable">
                 <div class="ui header">Liste des salons</div>
                 <div class="ui middle aligned divided list"  id="listRooms">
-                    <div class="item" id="default">
+                    <div class="item" id="Defaut">
                         <div class="right floated content">
-                            <div class="ui button tiny teal disabled">Connecté</div>
+                            <div class="ui button tiny gray" onclick="changeRoom('Defaut')">Connecté</div>
                         </div>
                         <div class="content room">
                             <div class="ui label teal circular">23</div>
@@ -148,21 +57,21 @@
                     </div>
                 </div>
             </div>
-            <div class="four wide column stackable">
+            <div class="four wide column stackable" >
                 <div class="ui header">Utilisateurs</div>
-                <div class="ui list">
-                    <div class="item">
+                <div class="ui list" id="users">
+                    <div class="item" id="Manuel">
                         <img class="ui avatar image" src="https://gitlab.info-ufr.univ-montp2.fr/uploads/user/avatar/670/entei.png">
                         <div class="content">
                             <a class="header">Manuel</a>
-                            <div class="description">En ligne</div>
+
                         </div>
                     </div>
-                    <div class="item">
+                    <div class="item" id="Morgane">
                         <img class="ui avatar image" src="https://avatars2.githubusercontent.com/u/6512917?v=3&s=460">
                         <div class="content">
                             <a class="header">Morgane</a>
-                            <div class="description">En ligne</div>
+
                         </div>
                     </div>
                 </div>
