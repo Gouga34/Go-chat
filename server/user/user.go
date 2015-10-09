@@ -3,8 +3,7 @@ package user
 import (
 	"crypto/md5"
 	"fmt"
-	"golang.org/x/net/websocket"
-	"projet/server/logger"
+	"github.com/googollee/go-socket.io"
 )
 
 // User Représente un utilisateur
@@ -13,7 +12,13 @@ type User struct {
 	Password [16]byte
 	Mail     string
 	Room     string
-	ws       *websocket.Conn
+	Socket   *socketio.Socket
+}
+
+// UserDetails Représente les informations d'un utilisateur dans la liste du client
+type UserDetails struct {
+	Login        string
+	GravatarLink string
 }
 
 // CreateUser Créé un objet utilisateur et le retourne
@@ -22,30 +27,35 @@ func CreateUser(login string, password [16]byte, mail string) *User {
 	return u
 }
 
+//GetSocket retourne la socket associée à l'utilisateur
+func (u *User) GetSocket() *socketio.Socket {
+	return u.Socket
+}
+
 //Read lis un message reçu par l'utilisateur
-func (u *User) Read() (string, error) {
-
-	message := make([]byte, 500)
-	nbRead, errRead := u.ws.Read(message)
-
-	if errRead != nil {
-		logger.Warning("(*User) Read", errRead)
-	}
-
-	return string(message[:nbRead]), errRead
-}
-
-//Write écrit un message
-func (u *User) Write(message string) {
-
-	messageToSend := []byte(message)
-	_, err := u.ws.Write(messageToSend)
-
-	if err != nil {
-		logger.Warning("(*User) Write", err)
-	}
-
-}
+// func (u *User) Read() (string, error) {
+//
+// 	message := make([]byte, 500)
+// 	nbRead, errRead := (*u.Socket).Read(message)
+//
+// 	if errRead != nil {
+// 		logger.Warning("(*User) Read", errRead)
+// 	}
+//
+// 	return string(message[:nbRead]), errRead
+// }
+//
+// //Write écrit un message
+// func (u *User) Write(message string) {
+//
+// 	messageToSend := []byte(message)
+// 	_, err := u.ws.Write(messageToSend)
+//
+// 	if err != nil {
+// 		logger.Warning("(*User) Write", err)
+// 	}
+//
+// }
 
 func ConnectSite(login string, password string) bool {
 

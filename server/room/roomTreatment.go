@@ -3,9 +3,9 @@ package room
 import (
 	"encoding/json"
 	"github.com/boltdb/bolt"
-	"log"
 )
 
+/*
 func connecxion() (*bolt.DB, error) {
 	db, err := bolt.Open("room.db", 0600, nil)
 	if err != nil {
@@ -17,7 +17,7 @@ func connecxion() (*bolt.DB, error) {
 func deconnecxion(db *bolt.DB) {
 	db.Close()
 }
-
+*/
 func addRoom(db *bolt.DB, roomName string) {
 	db.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucketIfNotExists([]byte("rooms"))

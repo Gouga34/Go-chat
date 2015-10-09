@@ -18,18 +18,18 @@ func deconnecxion(db *bolt.DB) {
 	db.Close()
 }
 
-func addConv(db *bolt.DB, m message.Message) {
+func addConv(db *bolt.DB, m message.SendMessage) {
 	db.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucketIfNotExists([]byte("convs"))
 		if err != nil {
 			return err
 		}
 		encoded := m.ToString()
-		return b.Put([]byte(m.GetTime()), []byte(encoded))
+		return b.Put([]byte(m.Time), []byte(encoded))
 	})
 }
 
-func getConv(db *bolt.DB, cle string) (m message.Message) {
+func getConv(db *bolt.DB, cle string) (m message.SendMessage) {
 	db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("convs"))
 		v := b.Get([]byte(cle))
