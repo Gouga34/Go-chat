@@ -1,6 +1,8 @@
 package user
 
 import (
+	"crypto/md5"
+	"fmt"
 	"golang.org/x/net/websocket"
 	"projet/server/logger"
 )
@@ -8,14 +10,14 @@ import (
 // User Représente un utilisateur
 type User struct {
 	Login    string
-	Password string
+	Password [16]byte
 	Mail     string
 	Room     string
 	ws       *websocket.Conn
 }
 
 // CreateUser Créé un objet utilisateur et le retourne
-func CreateUser(login string, password string, mail string) *User {
+func CreateUser(login string, password [16]byte, mail string) *User {
 	u := &User{login, password, mail, "", nil}
 	return u
 }
@@ -45,6 +47,39 @@ func (u *User) Write(message string) {
 
 }
 
-// func Connecxion(Login string, Password string) User {
-//
-// }
+func ConnectSite(login string, password string) bool {
+
+	db, _ := ConnecxionBd()
+	defer DeconnecxionBd(db)
+
+	u := GetUser(db, login)
+
+	if u.Login == login && u.Password == md5.Sum([]byte(password)) {
+		return true
+	} else {
+		return false
+	}
+
+}
+
+func InscriptionSite(login string, password string, password2 string, mail string) bool {
+
+	db, _ := ConnecxionBd()
+	defer DeconnecxionBd(db)
+
+	u := &User{login, md5.Sum([]byte(password)), mail, "Defaut", nil}
+
+	if ExistUser(db, login) {
+		if password == password2 {
+			AddUser(db, *u)
+			return true
+		} else {
+			fmt.Println("Le mot de passe doit etre identique")
+			return false
+		}
+	} else {
+		fmt.Println("Ce login existe déja")
+		return false
+	}
+
+}

@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-func connecxion() (*bolt.DB, error) {
+func ConnecxionBd() (*bolt.DB, error) {
 	db, err := bolt.Open("user.db", 0600, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -14,11 +14,11 @@ func connecxion() (*bolt.DB, error) {
 	return db, err
 }
 
-func deconnecxion(db *bolt.DB) {
+func DeconnecxionBd(db *bolt.DB) {
 	db.Close()
 }
 
-func addUser(db *bolt.DB, u User) {
+func AddUser(db *bolt.DB, u User) {
 	db.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucketIfNotExists([]byte("users"))
 		if err != nil {
@@ -33,7 +33,7 @@ func addUser(db *bolt.DB, u User) {
 	})
 }
 
-func getUser(db *bolt.DB, cle string) (u User) {
+func GetUser(db *bolt.DB, cle string) (u User) {
 	db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("users"))
 		v := b.Get([]byte(cle))
@@ -43,7 +43,7 @@ func getUser(db *bolt.DB, cle string) (u User) {
 	return
 }
 
-func existUser(db *bolt.DB, cle string) bool {
+func ExistUser(db *bolt.DB, cle string) bool {
 
 	var u User
 	var v []byte
