@@ -6,7 +6,7 @@ import (
 )
 
 /*
-func connecxion() (*bolt.DB, error) {
+func ConnecxionBdroom() (*bolt.DB, error) {
 	db, err := bolt.Open("room.db", 0600, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -14,7 +14,7 @@ func connecxion() (*bolt.DB, error) {
 	return db, err
 }
 
-func deconnecxion(db *bolt.DB) {
+func DeconnecxionBdroom(db *bolt.DB) {
 	db.Close()
 }
 */

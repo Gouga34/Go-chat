@@ -6,7 +6,7 @@ import (
 	"projet/server/message"
 )
 
-func connecxion() (*bolt.DB, error) {
+func ConnecxionBdconv() (*bolt.DB, error) {
 	db, err := bolt.Open("conv.db", 0600, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -14,7 +14,7 @@ func connecxion() (*bolt.DB, error) {
 	return db, err
 }
 
-func deconnecxion(db *bolt.DB) {
+func deconnecxionBdconv(db *bolt.DB) {
 	db.Close()
 }
 

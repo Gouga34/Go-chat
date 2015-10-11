@@ -82,9 +82,26 @@ func (server *Server) onConnection(so socketio.Socket) {
 		server.tryLoginUser(user, msg)
 	})
 
+	so.On("register", func(msg string) {
+		server.tryInscription(user, msg)
+	})
+
 	so.On("disconnection", func() {
 		logger.Print("on disconnect")
 	})
+}
+
+func (server *Server) tryInscription(u *user.User, message string) {
+
+	logger.Print("inscription d'un utilisateur")
+	socket := *u.GetSocket()
+
+	request := user.GetRegisterRequest(message)
+	inscriptionOk, loginOk, passwordOk := user.InscriptionSite(request.Login, request.Password, request.VerifPassword, request.Mail)
+
+	reply := user.RegisterReply{inscriptionOk, loginOk, passwordOk, request.Login, "", server.roomList.GetRoomsTab()}
+	socket.Emit("register", reply.ToString())
+
 }
 
 // tryLoginUser try to login user

@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-func ConnecxionBd() (*bolt.DB, error) {
+func ConnecxionBduser() (*bolt.DB, error) {
 	db, err := bolt.Open("user.db", 0600, nil)
 	if err != nil {
 		log.Fatal(err)
@@ -14,7 +14,7 @@ func ConnecxionBd() (*bolt.DB, error) {
 	return db, err
 }
 
-func DeconnecxionBd(db *bolt.DB) {
+func DeconnecxionBduser(db *bolt.DB) {
 	db.Close()
 }
 

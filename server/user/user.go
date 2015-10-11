@@ -39,6 +39,32 @@ type LoginReply struct {
 	GravatarLink string
 }
 
+type RegisterRequest struct {
+	Login         string
+	Password      string
+	VerifPassword string
+	Mail          string
+}
+
+type RegisterReply struct {
+	Success      bool
+	LoginOk      bool
+	PasswordOk   bool
+	Login        string
+	GravatarLink string
+	RoomList     []string
+}
+
+func GetRegisterRequest(message string) RegisterRequest {
+	var request RegisterRequest
+	err := json.Unmarshal([]byte(message), &request)
+	if err != nil {
+		logger.Error("Erreur lors de la désérialisation d'une demande de connexion", err)
+	}
+
+	return request
+}
+
 // CreateUser Créé un objet utilisateur et le retourne
 func CreateUser(login string, password [16]byte, mail string) *User {
 	u := &User{login, password, mail, "", nil}
@@ -63,6 +89,15 @@ func GetLoginRequest(message string) LoginRequest {
 
 // ToString Convertit l'objet LoginReply en string
 func (reply *LoginReply) ToString() string {
+	jsonContent, err := json.Marshal(reply)
+	if err != nil {
+		logger.Error("Erreur lors de la sérialisation d'un message", err)
+	}
+
+	return string(jsonContent[:])
+}
+
+func (reply *RegisterReply) ToString() string {
 	jsonContent, err := json.Marshal(reply)
 	if err != nil {
 		logger.Error("Erreur lors de la sérialisation d'un message", err)
@@ -99,8 +134,8 @@ func (reply *LoginReply) ToString() string {
 //ConnectSite  retour : bool,bool le premier bool correspond au login et le second au password
 func ConnectSite(login string, password string) (bool, bool) {
 
-	db, _ := ConnecxionBd()
-	defer DeconnecxionBd(db)
+	db, _ := ConnecxionBduser()
+	defer DeconnecxionBduser(db)
 
 	u := GetUser(db, login)
 	if u != nil {
@@ -118,24 +153,24 @@ func ConnectSite(login string, password string) (bool, bool) {
 	return false, false
 }
 
-func InscriptionSite(login string, password string, password2 string, mail string) bool {
+func InscriptionSite(login string, password string, password2 string, mail string) (bool, bool, bool) {
 
-	db, _ := ConnecxionBd()
-	defer DeconnecxionBd(db)
+	db, _ := ConnecxionBduser()
+	defer DeconnecxionBduser(db)
 
 	u := &User{login, md5.Sum([]byte(password)), mail, "Defaut", nil}
 
-	if ExistUser(db, login) {
+	if !ExistUser(db, login) {
 		if password == password2 {
 			AddUser(db, *u)
-			return true
+			return true, true, true
 		} else {
 			fmt.Println("Le mot de passe doit etre identique")
-			return false
+			return false, true, false
 		}
 	} else {
 		fmt.Println("Ce login existe déja")
-		return false
+		return false, false, false
 	}
 
 }
