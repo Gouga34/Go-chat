@@ -20,10 +20,36 @@ socket.on('newUser', function(data){
                                       addConnectedUserToList(data.Login, data.GravatarLink);
                                     });
 
+socket.on('register', function(data){
+  getResultOfInscription(data);
+});
+
+
 
 //Functions -------------------------------------------------------------------
 
 //Traitement des messages reçus ------------------------------------------
+
+
+/**
+ * @param data les données reçues
+ * @action connecte l'utilisateur si l'inscription a bien marché, affiche le problème sinon
+ */
+function getResultOfInscription(data){
+  datas=JSON.parse(data);
+  if(datas.Success){
+    $("#content").load('chat.html');
+    connectUser(datas.Login, datas.GravatarLink, datas.RoomList);
+  }
+  else{
+    if(!datas.LoginOk){
+      alert('Le login est déjà pris');
+    }
+    else if(!datas.PasswordOk){
+      alert('Les deux mots de passe sont différents');
+    }
+  }
+}
 
 /**
  * @param data les données reçues
@@ -68,6 +94,15 @@ function userConnection(data){
 }
 
 //Envoi des messages ---------------------------------------------------
+
+/**
+ * @param login, password, passwordVerif, mail : strings, données à enregistrer
+ * @action envoie un message d'inscritption au serveur.
+ */
+function sendInscriptionMessage(login, password, passwordVerif, mail){
+  var messageToSend={Login:login, Password:password, VerifPassword:passwordVerif, Mail:mail};
+  socket.emit("register", JSON.stringify(messageToSend));
+}
 
 /**
  * @action envoie au serveur les informations du formulaire de connexion

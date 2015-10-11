@@ -172,3 +172,33 @@ function printConnectionError(loginOk, passwordOk){
     alert('Mot de passe incorrect');
   }
 }
+
+/**
+ * @action récupère les données pour l'inscription de l'utilisateur et envoie le message au serveur
+ */
+function inscription(){
+  if(!checkIfPasswordsAreTheSame()){
+    alert('Les deux mots de passe ne sont pas les mêmes !');
+  }
+  else{
+    var login=document.getElementById('loginInsc').value;
+    var password = document.getElementById('passwordInsc').value;
+    var passwordVerif = document.getElementById('passwordInscrVerif').value;
+    var mail = document.getElementById('mailInsc').value;
+
+    sendInscriptionMessage(login, password, passwordVerif, mail);
+  }
+}
+
+/**
+ * @action verifie si le mot de passe donné est le même que la deuxième fois où le mot de passe est donné
+ * @return true si les deux mots de passe sont les mêmes, false sinon
+ */
+function checkIfPasswordsAreTheSame(){
+   var password = document.getElementById('passwordInsc').value;
+   var passwordVerif = document.getElementById('passwordInscrVerif').value;
+   if(password!==passwordVerif){
+     return false;
+   }
+   return true;
+}
