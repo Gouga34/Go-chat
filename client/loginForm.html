@@ -10,23 +10,23 @@
 </head>
 <body>
 
-<div classe="ui container main">
+<div classe="ui one column centered row">
 
   <div class="ui buttons">
-  <button class="ui button teal" onclick="lapasla()">Connecxion</button>
+  <button class="ui button teal" onclick="loginform()">Connecxion</button>
   <div class="or" data-text="ou"></div>
-  <button class="ui teal button" onclick="lapasla2()">Inscription</button>
+  <button class="ui teal button" onclick="inscriptionform()">Inscription</button>
   </div>
 
 
-     <form class="ui form comments" id ="formulaire1" style="display: block;" >
+     <form class="ui six wide tablet eight wide computer centered column form" id ="formulaire1" style="display: block;" >
        <div class="field">
          <label>Login</label>
          <input type="text" name="login" placeholder="Login">
        </div>
        <div class="field">
          <label>Mot de passe</label>
-         <input type="text" name="password" placeholder="Mot de passe">
+         <input type="password" name="password" placeholder="Mot de passe">
        </div>
 
        <div class="ui animated button teal" tabindex="0">
@@ -40,22 +40,22 @@
 
 
 
-        <form class="ui form comments" id ="formulaire2" style="display: none;" >
+        <form class="ui six wide tablet eight wide computer centered column form" id ="formulaire2" style="display: none;" >
           <div class="field">
             <label>Login</label>
             <input type="text" name="login" placeholder="Login">
           </div>
           <div class="field">
             <label>Mot de passe</label>
-            <input type="text" name="login" placeholder="Mot de passe ...">
+            <input type="password" name="password" placeholder="Mot de passe ...">
           </div>
           <div class="field">
             <label>Vérification mot de passe</label>
-            <input type="text" name="login" placeholder="Verification mot de passe">
+            <input type="password" name="passwordVerif" placeholder="Verification mot de passe">
           </div>
           <div class="field">
             <label>Mail</label>
-            <input type="text" name="password" placeholder="ex: mail@gmail.com">
+            <input type="text" name="mail" placeholder="ex: mail@gmail.com">
           </div>
 
           <div class="ui animated button teal" tabindex="0">
@@ -76,7 +76,7 @@
 
 <script>
 
-function lapasla() {
+function loginform() {
 
     var f1 = document.getElementById("formulaire1");
     var f2 = document.getElementById("formulaire2");
@@ -85,7 +85,7 @@ function lapasla() {
          f2.style.display = 'none';}
   }
 
-  function lapasla2() {
+  function inscriptionform() {
 
       var f1 = document.getElementById("formulaire1");
       var f2 = document.getElementById("formulaire2");
