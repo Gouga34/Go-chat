@@ -82,26 +82,9 @@ func (server *Server) onConnection(so socketio.Socket) {
 		server.tryLoginUser(user, msg)
 	})
 
-	so.On("register", func(msg string) {
-		server.tryInscription(user, msg)
-	})
-
 	so.On("disconnection", func() {
 		logger.Print("on disconnect")
 	})
-}
-
-func (server *Server) tryInscription(u *user.User, message string) {
-
-	logger.Print("inscription d'un utilisateur")
-	socket := *u.GetSocket()
-
-	request := user.GetRegisterRequest(message)
-	inscriptionOk, loginOk, passwordOk := user.InscriptionSite(request.Login, request.Password, request.VerifPassword, request.Mail)
-
-	reply := user.RegisterReply{inscriptionOk, loginOk, passwordOk, request.Login, "", server.roomList.GetRoomsTab()}
-	socket.Emit("register", reply.ToString())
-
 }
 
 // tryLoginUser try to login user
@@ -151,6 +134,16 @@ func (server *Server) roomChangement(user *user.User, message string) {
 	}
 }
 
+func (server *Server) saveMessageInDb(message message.SendMessage) {
+	db, err := room.ConnecxionBdconv()
+	if err != nil {
+		logger.Fatal("Erreur lors de l'enregistrement du message dans la bd", err)
+	}
+	defer room.DeconnecxionBdconv(db)
+
+	room.AddConv(db, message)
+}
+
 // messageReception Réception d'un message par un client
 func (server *Server) messageReception(user *user.User, receivedMessage string) {
 
@@ -160,6 +153,7 @@ func (server *Server) messageReception(user *user.User, receivedMessage string) 
 	receivedMessageObject := message.GetMessageObject(receivedMessage)
 
 	messageToBroadcast := message.SendMessage{receivedMessageObject.Content, user.Login, receivedMessageObject.Time, ""}
+	server.saveMessageInDb(messageToBroadcast)
 
 	socket.Emit("message", messageToBroadcast.ToString())
 	socket.BroadcastTo(user.Room, "message", messageToBroadcast.ToString())

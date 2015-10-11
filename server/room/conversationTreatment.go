@@ -14,11 +14,11 @@ func ConnecxionBdconv() (*bolt.DB, error) {
 	return db, err
 }
 
-func deconnecxionBdconv(db *bolt.DB) {
+func DeconnecxionBdconv(db *bolt.DB) {
 	db.Close()
 }
 
-func addConv(db *bolt.DB, m message.SendMessage) {
+func AddConv(db *bolt.DB, m message.SendMessage) {
 	db.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucketIfNotExists([]byte("convs"))
 		if err != nil {
@@ -29,7 +29,7 @@ func addConv(db *bolt.DB, m message.SendMessage) {
 	})
 }
 
-func getConv(db *bolt.DB, cle string) (m message.SendMessage) {
+func GetConv(db *bolt.DB, cle string) (m message.SendMessage) {
 	db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("convs"))
 		v := b.Get([]byte(cle))

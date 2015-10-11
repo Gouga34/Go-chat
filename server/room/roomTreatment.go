@@ -3,13 +3,13 @@ package room
 import (
 	"encoding/json"
 	"github.com/boltdb/bolt"
+	"projet/server/logger"
 )
 
-/*
 func ConnecxionBdroom() (*bolt.DB, error) {
 	db, err := bolt.Open("room.db", 0600, nil)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal("Erreur d'ouverture de bd", err)
 	}
 	return db, err
 }
@@ -17,8 +17,8 @@ func ConnecxionBdroom() (*bolt.DB, error) {
 func DeconnecxionBdroom(db *bolt.DB) {
 	db.Close()
 }
-*/
-func addRoom(db *bolt.DB, roomName string) {
+
+func AddRoom(db *bolt.DB, roomName string) {
 	db.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucketIfNotExists([]byte("rooms"))
 		if err != nil {
@@ -32,7 +32,7 @@ func addRoom(db *bolt.DB, roomName string) {
 	})
 }
 
-func getRoom(db *bolt.DB, roomName string) (r Room) {
+func GetRoom(db *bolt.DB, roomName string) (r Room) {
 	db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("rooms"))
 		v := b.Get([]byte(roomName))
@@ -42,7 +42,7 @@ func getRoom(db *bolt.DB, roomName string) (r Room) {
 	return
 }
 
-func existUser(db *bolt.DB, roomName string) bool {
+func ExistUser(db *bolt.DB, roomName string) bool {
 
 	var r Room
 	var v []byte
