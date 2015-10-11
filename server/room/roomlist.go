@@ -65,7 +65,7 @@ func GetChangeRoomRequest(message string) ChangeRoomRequest {
 	return request
 }
 
-// ToString Convertit l'objet Message en string
+// ToString Convertit l'objet ChangeRoomReply en string
 func (reply *ChangeRoomReply) ToString() string {
 	jsonContent, err := json.Marshal(reply)
 	if err != nil {
@@ -129,4 +129,15 @@ func (roomList *RoomList) GetUsersRoom(loginUser string) *Room {
 		}
 	}
 	return nil
+}
+
+//GetRoomsTab Retourne le tableau des salles pour envoyer au client
+func (roomList *RoomList) GetRoomsTab() []string {
+	var rooms []string
+
+	for _, value := range roomList.rooms {
+		rooms = append(rooms, value.GetName())
+	}
+
+	return rooms
 }

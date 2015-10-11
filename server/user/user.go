@@ -2,8 +2,10 @@ package user
 
 import (
 	"crypto/md5"
+	"encoding/json"
 	"fmt"
 	"github.com/googollee/go-socket.io"
+	"projet/server/logger"
 )
 
 // User Représente un utilisateur
@@ -21,6 +23,22 @@ type UserDetails struct {
 	GravatarLink string
 }
 
+//LoginRequest
+type LoginRequest struct {
+	Login    string
+	Password string
+}
+
+//LoginReply Représene la structure de réponse à un message "login"
+type LoginReply struct {
+	Success      bool
+	LoginOk      bool
+	PasswordOk   bool
+	Login        string
+	RoomList     []string
+	GravatarLink string
+}
+
 // CreateUser Créé un objet utilisateur et le retourne
 func CreateUser(login string, password [16]byte, mail string) *User {
 	u := &User{login, password, mail, "", nil}
@@ -30,6 +48,27 @@ func CreateUser(login string, password [16]byte, mail string) *User {
 //GetSocket retourne la socket associée à l'utilisateur
 func (u *User) GetSocket() *socketio.Socket {
 	return u.Socket
+}
+
+// GetLoginRequest Retourne la requête de connexion associée au message
+func GetLoginRequest(message string) LoginRequest {
+	var request LoginRequest
+	err := json.Unmarshal([]byte(message), &request)
+	if err != nil {
+		logger.Error("Erreur lors de la désérialisation d'une demande de connexion", err)
+	}
+
+	return request
+}
+
+// ToString Convertit l'objet LoginReply en string
+func (reply *LoginReply) ToString() string {
+	jsonContent, err := json.Marshal(reply)
+	if err != nil {
+		logger.Error("Erreur lors de la sérialisation d'un message", err)
+	}
+
+	return string(jsonContent[:])
 }
 
 //Read lis un message reçu par l'utilisateur
@@ -57,19 +96,26 @@ func (u *User) GetSocket() *socketio.Socket {
 //
 // }
 
-func ConnectSite(login string, password string) bool {
+//ConnectSite  retour : bool,bool le premier bool correspond au login et le second au password
+func ConnectSite(login string, password string) (bool, bool) {
 
 	db, _ := ConnecxionBd()
 	defer DeconnecxionBd(db)
 
 	u := GetUser(db, login)
-
-	if u.Login == login && u.Password == md5.Sum([]byte(password)) {
-		return true
-	} else {
-		return false
+	if u != nil {
+		if u.Login == login && u.Password == md5.Sum([]byte(password)) {
+			return true, true
+		} else {
+			if u.Login != login {
+				return false, false
+			} else {
+				return true, false
+			}
+		}
 	}
 
+	return false, false
 }
 
 func InscriptionSite(login string, password string, password2 string, mail string) bool {

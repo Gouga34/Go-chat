@@ -33,14 +33,20 @@ func AddUser(db *bolt.DB, u User) {
 	})
 }
 
-func GetUser(db *bolt.DB, cle string) (u User) {
+func GetUser(db *bolt.DB, cle string) (u *User) {
+	var usr *User = &User{}
+
 	db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("users"))
 		v := b.Get([]byte(cle))
-		json.Unmarshal(v, &u)
+		err := json.Unmarshal(v, usr)
+		if err != nil {
+			log.Println(err)
+		}
+
 		return nil
 	})
-	return
+	return usr
 }
 
 func ExistUser(db *bolt.DB, cle string) bool {

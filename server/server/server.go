@@ -77,9 +77,28 @@ func (server *Server) onConnection(so socketio.Socket) {
 		server.messageReception(user, msg)
 	})
 
+	//Login d'un utilisateur
+	so.On("login", func(msg string) {
+		server.tryLoginUser(user, msg)
+	})
+
 	so.On("disconnection", func() {
 		logger.Print("on disconnect")
 	})
+}
+
+// tryLoginUser try to login user
+func (server *Server) tryLoginUser(u *user.User, message string) {
+	logger.Print("Connexion d'un utilisateur")
+	socket := *u.GetSocket()
+
+	request := user.GetLoginRequest(message)
+	login, password := user.ConnectSite(request.Login, request.Password)
+
+	success := login && password
+
+	reply := user.LoginReply{success, login, password, request.Login, server.roomList.GetRoomsTab(), ""}
+	socket.Emit("login", reply.ToString())
 }
 
 // roomChangement Demande de changement de salle par un client
