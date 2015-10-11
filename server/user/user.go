@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/googollee/go-socket.io"
+	"projet/server/constants"
 	"projet/server/logger"
 )
 
@@ -158,7 +159,7 @@ func InscriptionSite(login string, password string, password2 string, mail strin
 	db, _ := ConnecxionBduser()
 	defer DeconnecxionBduser(db)
 
-	u := &User{login, md5.Sum([]byte(password)), mail, "Defaut", nil}
+	u := &User{login, md5.Sum([]byte(password)), mail, constants.DefaultRoom, nil}
 
 	if !ExistUser(db, login) {
 		if password == password2 {

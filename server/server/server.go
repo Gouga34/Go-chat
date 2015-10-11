@@ -61,7 +61,6 @@ func (server *Server) onConnection(so socketio.Socket) {
 	roomName := constants.DefaultRoom
 	user := &user.User{Login: "loginServ", Room: roomName, Socket: &so} // TODO Récupérer le login de l'utilisateur
 
-	server.roomList.AddRoom(roomName)
 	server.roomList.AddUserInRoom(user, roomName)
 
 	so.Join(roomName)

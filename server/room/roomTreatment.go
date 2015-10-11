@@ -24,22 +24,38 @@ func AddRoom(db *bolt.DB, roomName string) {
 		if err != nil {
 			return err
 		}
-		encoded, err := json.Marshal(roomName)
-		if err != nil {
-			return err
-		}
-		return b.Put([]byte(roomName), encoded)
+
+		encoded := "{\"name\": \"" + roomName + "\"}"
+		return b.Put([]byte(roomName), []byte(encoded))
 	})
 }
 
-func GetRoom(db *bolt.DB, roomName string) (r Room) {
+func GetRoom(db *bolt.DB, roomName string) (room *string) {
 	db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("rooms"))
 		v := b.Get([]byte(roomName))
-		json.Unmarshal(v, &r)
+		json.Unmarshal(v, &room)
 		return nil
 	})
-	return
+	return room
+}
+
+func GetRooms(db *bolt.DB) []string {
+	var rooms []string
+
+	db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("rooms"))
+		if b != nil {
+			b.ForEach(func(key, value []byte) error {
+				rooms = append(rooms, string(value))
+				return nil
+			})
+		}
+
+		return nil
+	})
+
+	return rooms
 }
 
 func ExistUser(db *bolt.DB, roomName string) bool {
