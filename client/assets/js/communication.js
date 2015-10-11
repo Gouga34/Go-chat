@@ -2,6 +2,10 @@ var socket = io();
 
 socket.on('connect', function() {});
 
+socket.on('login', function(data){
+                                    userConnection(data);
+                                });
+
 socket.on('message', function(data){
                                       printMessage(data);
                                     });
@@ -36,15 +40,45 @@ function printMessage(data){
  */
 function switchUsersRoom(data){
   var datas=JSON.parse(data);
+  alert("datas.success : "+datas.Success);
+  alert("datas.newroom : "+datas.NewRoom);
   if(datas.Success){
     if(datas.NewRoom){
       addRoom(datas.RoomName);
     }
-    switchRoom(datas.RoomName, datas.ConnectedClients);
+    alert('switch room');
+    switchRoom(datas.RoomName);
+  }
+}
+
+/**
+ * @param data les données reçues
+ * @action Traite le retour de connexion envoyé au serveur
+ */
+function userConnection(data){
+
+  var datas=JSON.parse(data);
+  if(datas.Success){
+    $("#content").load('chat.html');
+    connectUser(datas.Login, datas.GravatarLink, datas.RoomList);
+  }
+  else {
+    printConnectionError(datas.LoginOk, datas.PasswordOk)
   }
 }
 
 //Envoi des messages ---------------------------------------------------
+
+/**
+ * @action envoie au serveur les informations du formulaire de connexion
+ */
+function sendConnectionForm(){
+  var login = document.getElementById('login').value;
+  var password = document.getElementById('password').value;
+
+  var messageToSend = {Login:login, Password:password};
+  socket.emit("login", JSON.stringify(messageToSend));
+}
 
 /**
  * @action envoie un message pour changer de salle au serveur
@@ -60,7 +94,7 @@ function changeRoom(data){
 function senddata() {
    var data = document.getElementById('textToSend').value;
    var time=new Date(Date.now());
-   var messageToSend={content:data, author:"", time: time.toDateString()+" "+time.getHours()+"h"+time.getMinutes()};
+   var messageToSend={Content:data, Author:"", Time: time.toDateString()+" "+time.getHours()+"h"+time.getMinutes()};
    var serializedMessage = JSON.stringify(messageToSend);
    socket.emit('message', serializedMessage);
 }

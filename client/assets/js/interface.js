@@ -15,6 +15,7 @@ function addRoom(roomName){
           +roomName
       +"</div>"
   +"</div>";
+  alert("addRoom done");
 }
 
 /**
@@ -63,17 +64,17 @@ function changeRoomConnectionButtonToDisconnected(roomName){
  * @param connectedClients liste des utilisateurs connectés à roomName
  * @action change la room à laquelle est connecté le client et affiche la liste des utilisateurs connectés à la salle.
  */
-function switchRoom(roomName, connectedClients){
+function switchRoom(roomName){
   clearCommentsList();
   changeRoomsConnectionButtonToDisconnected();
   changeRoomConnectionButtonToConnected(roomName);
   if(roomName!="Defaut"){
-    changeRoomConnectionButtonToDisconnected("defaut");
+    changeRoomConnectionButtonToDisconnected(roomName);
   }
 
-  for(var i=0; i<connectedClients.length; i++){
-    addConnectedUserToList(connectedClients[i].Login, connectedClients[i].GravatarLink);
-  }
+  // for(var i=0; i<connectedClients.length; i++){
+  //   addConnectedUserToList(connectedClients[i].Login, connectedClients[i].GravatarLink);
+  // }
 }
 
 /**
@@ -140,4 +141,34 @@ function addConnectedUserToList(login, image){
       +"<a class=\"header\">"+login+"</a>"
     +"</div>"
   +"</div>";
+}
+
+/**
+ * @param login login de l'utilisateur connecté
+ * @param image avatar de l'utilisateur
+ * @action affiche l'utilisateur courant comme connecté
+ */
+function connectUser(login, image){
+  alert("Bienvenue "+login);
+  document.getElementById('users').innerHTML+=
+  "<div class=\"item\" id=\"currentUser\">"
+      +"<img class=\"ui avatar image\" src=\""+image+"\">"
+      +"<div class=\"content\">"
+          +"<a class=\"header\">"+login+"</a>"
+      +"</div>"
+  +"</div>";
+}
+
+/**
+ * @param loginOk
+ * @param passwordOk
+ * @action affiche une erreur de connexion à l'utilisateur
+ */
+function printConnectionError(loginOk, passwordOk){
+  if(!loginOk){
+    alert('Login inconnu');
+  }
+  else{
+    alert('Mot de passe incorrect');
+  }
 }
