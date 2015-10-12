@@ -66,13 +66,11 @@ function printMessage(data){
  */
 function switchUsersRoom(data){
   var datas=JSON.parse(data);
-  alert("datas.success : "+datas.Success);
-  alert("datas.newroom : "+datas.NewRoom);
   if(datas.Success){
     if(datas.NewRoom){
       addRoom(datas.RoomName);
     }
-    alert('switch room');
+
     switchRoom(datas.RoomName);
   }
 }

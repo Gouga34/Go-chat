@@ -61,9 +61,5 @@ func (room *Room) getFromDb(key string) {
 }
 
 func (room *Room) String() string {
-	jsonContent, err := json.Marshal(room)
-	if err != nil {
-		logger.Error("Room::String - Erreur lors de la sérialisation d'une room", err)
-	}
-	return string(jsonContent[:])
+	return "{\"Name\":\"" + room.Name + "\"}"
 }

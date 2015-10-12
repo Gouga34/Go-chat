@@ -15,7 +15,6 @@ function addRoom(roomName){
           +roomName
       +"</div>"
   +"</div>";
-  alert("addRoom done");
 }
 
 /**
@@ -146,9 +145,10 @@ function addConnectedUserToList(login, image){
 /**
  * @param login login de l'utilisateur connecté
  * @param image avatar de l'utilisateur
+ * @param roomList liste des salons disponibles
  * @action affiche l'utilisateur courant comme connecté
  */
-function connectUser(login, image){
+function connectUser(login, image, roomList){
   alert("Bienvenue "+login);
   document.getElementById('users').innerHTML+=
   "<div class=\"item\" id=\"currentUser\">"
@@ -157,6 +157,10 @@ function connectUser(login, image){
           +"<a class=\"header\">"+login+"</a>"
       +"</div>"
   +"</div>";
+
+  for (var i = 0; i < roomList.length; i++){
+    addRoom(roomList[i]);
+  }
 }
 
 /**

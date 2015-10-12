@@ -18,6 +18,7 @@ const UserBucket = "user"
 //RoomBucket bucket room
 const RoomBucket = "room"
 
+//Db Objet global de gestion de la bd
 var Db *DbManager
 
 //DbManager manager de la BD
@@ -25,6 +26,7 @@ type DbManager struct {
 	db *bolt.DB
 }
 
+//Init Connexion à la bd et création des buckets
 func Init() {
 	Db = &DbManager{}
 	Db.connection()
@@ -48,6 +50,7 @@ func (dbManager *DbManager) disconnection() {
 	}
 }
 
+//CreateBucketsIfNotExist Créé l'ensemble des buckets pour le chat s'ils n'existent pas
 func (dbManager *DbManager) CreateBucketsIfNotExist() {
 
 	dbManager.db.Update(func(tx *bolt.Tx) error {
@@ -93,6 +96,7 @@ func (dbManager *DbManager) AddValue(bucketName string, key string, object fmt.S
 	return nil
 }
 
+//Get Récupère la valeur associée à la clé passée en paramètre dans le bucket bucketName
 func (dbManager *DbManager) Get(bucketName string, key string) []byte {
 	var value []byte
 	// defer dbManager.disconnection()
@@ -110,11 +114,12 @@ func (dbManager *DbManager) Get(bucketName string, key string) []byte {
 	return value
 }
 
+//GetElementsFromBucket Récupère l'ensemble des éléments du bucket passé en paramètre
 func (dbManager *DbManager) GetElementsFromBucket(bucketName string) []string {
 	var values []string
 
 	dbManager.db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte("rooms"))
+		b := tx.Bucket([]byte(bucketName))
 		if b != nil {
 			b.ForEach(func(key, value []byte) error {
 				values = append(values, string(value))

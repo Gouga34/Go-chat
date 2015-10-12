@@ -30,6 +30,21 @@ type ChangeRoomReply struct {
 //Init initialise la liste des salles
 func (roomList *RoomList) Init() {
 	roomList.rooms = make(map[string]*Room)
+
+	rooms := db.Db.GetElementsFromBucket(db.RoomBucket)
+	for _, room := range rooms {
+		var roomFields map[string]string
+		err := json.Unmarshal([]byte(room), &roomFields)
+		if err != nil {
+			logger.Error("Erreur lors de la désérilisation des salles de la bd", err)
+		}
+
+		roomName := roomFields["Name"]
+
+		var roomUsers map[string]*user.User
+		roomList.rooms[roomName] = &Room{roomName, roomUsers}
+		roomList.rooms[roomName].Init(roomName)
+	}
 }
 
 //Exist retourne true si la salle passée en paramètre existe

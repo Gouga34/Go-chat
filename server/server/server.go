@@ -27,10 +27,10 @@ func CreateServer() Server {
 		logger.Fatal("Erreur lors de la création du serveur", err)
 	}
 
+	db.Init()
+
 	server.createRouter()
 	server.roomList.Init()
-
-	db.Init()
 
 	server.socket.On("connection", server.onConnection)
 	server.socket.On("error", func(so socketio.Socket, err error) {
