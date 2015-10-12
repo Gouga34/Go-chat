@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/googollee/go-socket.io"
 	"projet/server/constants"
+	"projet/server/db"
 	"projet/server/logger"
 )
 
@@ -72,11 +73,6 @@ func CreateUser(login string, password [16]byte, mail string) *User {
 	return u
 }
 
-//GetSocket retourne la socket associée à l'utilisateur
-func (u *User) GetSocket() *socketio.Socket {
-	return u.Socket
-}
-
 // GetLoginRequest Retourne la requête de connexion associée au message
 func GetLoginRequest(message string) LoginRequest {
 	var request LoginRequest
@@ -88,8 +84,16 @@ func GetLoginRequest(message string) LoginRequest {
 	return request
 }
 
-// ToString Convertit l'objet LoginReply en string
-func (reply *LoginReply) ToString() string {
+func (usr *User) String() string {
+	jsonContent, err := json.Marshal(usr)
+	if err != nil {
+		logger.Error("User::String - Erreur lors de la sérialisation d'un message", err)
+	}
+	return string(jsonContent[:])
+}
+
+// String Convertit l'objet LoginReply en string
+func (reply *LoginReply) String() string {
 	jsonContent, err := json.Marshal(reply)
 	if err != nil {
 		logger.Error("Erreur lors de la sérialisation d'un message", err)
@@ -98,7 +102,7 @@ func (reply *LoginReply) ToString() string {
 	return string(jsonContent[:])
 }
 
-func (reply *RegisterReply) ToString() string {
+func (reply *RegisterReply) String() string {
 	jsonContent, err := json.Marshal(reply)
 	if err != nil {
 		logger.Error("Erreur lors de la sérialisation d'un message", err)
@@ -106,40 +110,14 @@ func (reply *RegisterReply) ToString() string {
 
 	return string(jsonContent[:])
 }
-
-//Read lis un message reçu par l'utilisateur
-// func (u *User) Read() (string, error) {
-//
-// 	message := make([]byte, 500)
-// 	nbRead, errRead := (*u.Socket).Read(message)
-//
-// 	if errRead != nil {
-// 		logger.Warning("(*User) Read", errRead)
-// 	}
-//
-// 	return string(message[:nbRead]), errRead
-// }
-//
-// //Write écrit un message
-// func (u *User) Write(message string) {
-//
-// 	messageToSend := []byte(message)
-// 	_, err := u.ws.Write(messageToSend)
-//
-// 	if err != nil {
-// 		logger.Warning("(*User) Write", err)
-// 	}
-//
-// }
 
 //ConnectSite  retour : bool,bool le premier bool correspond au login et le second au password
 func ConnectSite(login string, password string) (bool, bool) {
 
-	db, _ := ConnecxionBduser()
-	defer DeconnecxionBduser(db)
+	var u *User = &User{}
+	u.getFromDb(login)
 
-	u := GetUser(db, login)
-	if u != nil {
+	if u.Login != "" {
 		if u.Login == login && u.Password == md5.Sum([]byte(password)) {
 			return true, true
 		} else {
@@ -156,22 +134,30 @@ func ConnectSite(login string, password string) (bool, bool) {
 
 func InscriptionSite(login string, password string, password2 string, mail string) (bool, bool, bool) {
 
-	db, _ := ConnecxionBduser()
-	defer DeconnecxionBduser(db)
-
 	u := &User{login, md5.Sum([]byte(password)), mail, constants.DefaultRoom, nil}
 
-	if !ExistUser(db, login) {
+	var usr *User = &User{}
+	usr.getFromDb(login)
+
+	if usr.Login == "" {
 		if password == password2 {
-			AddUser(db, *u)
+			db.Db.AddValue(db.UserBucket, login, u)
 			return true, true, true
 		} else {
 			fmt.Println("Le mot de passe doit etre identique")
 			return false, true, false
 		}
 	} else {
-		fmt.Println("Ce login existe déja")
+		fmt.Println("Ce login existe déja " + usr.Login)
 		return false, false, false
 	}
+}
 
+func (user *User) getFromDb(key string) {
+
+	encodedUser := db.Db.Get(db.UserBucket, key)
+	err := json.Unmarshal(encodedUser, user)
+	if err != nil {
+		logger.Error("Désérialisation d'un utilisateur - ", err)
+	}
 }

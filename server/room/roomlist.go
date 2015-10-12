@@ -3,6 +3,7 @@ package room
 import (
 	"encoding/json"
 	"errors"
+	"projet/server/db"
 	"projet/server/logger"
 	"projet/server/user"
 	"strconv"
@@ -29,19 +30,6 @@ type ChangeRoomReply struct {
 //Init initialise la liste des salles
 func (roomList *RoomList) Init() {
 	roomList.rooms = make(map[string]*Room)
-
-	db, err := ConnecxionBdroom()
-	if err != nil {
-		logger.Fatal("Erreur lors de l'enregistrement d'une salle dans la bd", err)
-	}
-	defer DeconnecxionBdroom(db)
-
-	rooms := GetRooms(db)
-	for _, room := range rooms {
-		var roomUsers map[string]*user.User
-		roomList.rooms[room] = &Room{room, roomUsers}
-		roomList.rooms[room].Init(room)
-	}
 }
 
 //Exist retourne true si la salle passée en paramètre existe
@@ -61,7 +49,7 @@ func (roomList *RoomList) ToString() string {
 	var output string
 
 	for _, value := range roomList.rooms {
-		output += value.name + " - " + strconv.Itoa(value.NumberOfUsers()) + "\n"
+		output += value.Name + " - " + strconv.Itoa(value.NumberOfUsers()) + "\n"
 	}
 
 	return output
@@ -88,16 +76,6 @@ func (reply *ChangeRoomReply) ToString() string {
 	return string(jsonContent[:])
 }
 
-func (roomList *RoomList) saveRoomInDb(roomName string) {
-	db, err := ConnecxionBdroom()
-	if err != nil {
-		logger.Fatal("Erreur lors de l'enregistrement d'une salle dans la bd", err)
-	}
-	defer DeconnecxionBdroom(db)
-
-	AddRoom(db, roomName)
-}
-
 //AddRoom ajoute une nouvelle salle à la liste
 func (roomList *RoomList) AddRoom(roomName string) error {
 	var err error
@@ -106,7 +84,6 @@ func (roomList *RoomList) AddRoom(roomName string) error {
 		var roomUsers map[string]*user.User
 		roomList.rooms[roomName] = &Room{roomName, roomUsers}
 		roomList.rooms[roomName].Init(roomName)
-
 		roomList.saveRoomInDb(roomName)
 	} else {
 		err = errors.New("AddUserInRoom - La salle existe déjà")
@@ -117,7 +94,7 @@ func (roomList *RoomList) AddRoom(roomName string) error {
 //RemoveRoom supprime la salle de la liste
 func (roomList *RoomList) RemoveRoom(roomName string) error {
 	var err error
-	if len(roomList.rooms[roomName].users) == 0 {
+	if len(roomList.rooms[roomName].Users) == 0 {
 		delete(roomList.rooms, roomName)
 	} else {
 		err = errors.New("RemoveRoom - Il y a encore un user connecté à la salle")
@@ -161,8 +138,14 @@ func (roomList *RoomList) GetRoomsTab() []string {
 	var rooms []string
 
 	for _, value := range roomList.rooms {
-		rooms = append(rooms, value.GetName())
+		rooms = append(rooms, value.Name)
 	}
 
 	return rooms
+}
+
+func (roomList *RoomList) saveRoomInDb(roomName string) {
+	var room Room
+	room.Name = roomName
+	db.Db.AddValue(db.RoomBucket, roomName, &room)
 }

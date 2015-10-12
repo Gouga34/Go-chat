@@ -1,44 +1,42 @@
 package room
 
 import (
+	"encoding/json"
+	"projet/server/db"
+	"projet/server/logger"
 	"projet/server/user"
 )
 
 //Room représente une salle de chat
 type Room struct {
-	name  string
-	users map[string]*user.User
+	Name  string
+	Users map[string]*user.User
 }
 
 //Init initialise la nouvelle salle
 func (room *Room) Init(name string) {
-	room.name = name
-	room.users = make(map[string]*user.User)
-}
-
-//GetName retourne le nom de la salle
-func (room *Room) GetName() string {
-	return room.name
+	room.Name = name
+	room.Users = make(map[string]*user.User)
 }
 
 //NumberOfUsers retourne le nombre d'utilisateurs dans la salle
 func (room *Room) NumberOfUsers() int {
-	return len(room.users)
+	return len(room.Users)
 }
 
 //AddUser ajoute un utilisateur à la salle de chat
 func (room *Room) AddUser(user *user.User) {
-	room.users[user.Login] = user
+	room.Users[user.Login] = user
 }
 
 //RemoveUser retire un utilsateur de la salle de chat
 func (room *Room) RemoveUser(userLogin string) {
-	delete(room.users, userLogin)
+	delete(room.Users, userLogin)
 }
 
 //GetUser retourne l'utilisateur s'il est dans la salle, nil sinon
 func (room *Room) GetUser(login string) *user.User {
-	u, _ := room.users[login]
+	u, _ := room.Users[login]
 	return u
 }
 
@@ -46,9 +44,26 @@ func (room *Room) GetUser(login string) *user.User {
 func (room *Room) GetUsersDetails() []user.UserDetails {
 	var users []user.UserDetails
 
-	for _, value := range room.users {
+	for _, value := range room.Users {
 		users = append(users, user.UserDetails{value.Login, ""})
 	}
 
 	return users
+}
+
+func (room *Room) getFromDb(key string) {
+
+	encodedRoom := db.Db.Get(db.RoomBucket, key)
+	err := json.Unmarshal(encodedRoom, room)
+	if err != nil {
+		logger.Error("Désérialisation d'une room", err)
+	}
+}
+
+func (room *Room) String() string {
+	jsonContent, err := json.Marshal(room)
+	if err != nil {
+		logger.Error("Room::String - Erreur lors de la sérialisation d'une room", err)
+	}
+	return string(jsonContent[:])
 }

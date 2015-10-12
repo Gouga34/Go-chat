@@ -2,6 +2,7 @@ package message
 
 import (
 	"encoding/json"
+	"projet/server/db"
 	"projet/server/logger"
 )
 
@@ -31,11 +32,21 @@ func GetMessageObject(message string) ReceiveMessage {
 }
 
 // ToString Convertit l'objet Message en string
-func (message *SendMessage) ToString() string {
+func (message *SendMessage) String() string {
 	jsonContent, err := json.Marshal(message)
 	if err != nil {
 		logger.Error("Erreur lors de la sérialisation d'un message", err)
 	}
 
 	return string(jsonContent[:])
+}
+
+func (message *SendMessage) getFromDb(key string) {
+
+	encodedMessage := db.Db.Get(db.MessageBucket, key)
+
+	err := json.Unmarshal(encodedMessage, message)
+	if err != nil {
+		logger.Error("Désérialisation d'un message", err)
+	}
 }

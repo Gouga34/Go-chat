@@ -1,12 +1,10 @@
 package server
 
 import (
-	//	"encoding/json"
 	"github.com/googollee/go-socket.io"
-	//	"html/template"
-	//	"io"
 	"net/http"
 	"projet/server/constants"
+	"projet/server/db"
 	"projet/server/logger"
 	"projet/server/message"
 	"projet/server/room"
@@ -31,6 +29,8 @@ func CreateServer() Server {
 
 	server.createRouter()
 	server.roomList.Init()
+
+	db.Init()
 
 	server.socket.On("connection", server.onConnection)
 	server.socket.On("error", func(so socketio.Socket, err error) {
@@ -61,8 +61,6 @@ func (server *Server) onConnection(so socketio.Socket) {
 	roomName := constants.DefaultRoom
 	user := &user.User{Login: "loginServ", Room: roomName, Socket: &so} // TODO Récupérer le login de l'utilisateur
 
-	server.roomList.AddUserInRoom(user, roomName)
-
 	so.Join(roomName)
 	logger.Print("Client join " + roomName + " room")
 
@@ -81,15 +79,31 @@ func (server *Server) onConnection(so socketio.Socket) {
 		server.tryLoginUser(user, msg)
 	})
 
+	so.On("register", func(msg string) {
+		server.tryInscription(user, msg)
+	})
+
 	so.On("disconnection", func() {
 		logger.Print("on disconnect")
 	})
 }
 
+func (server *Server) tryInscription(u *user.User, message string) {
+
+	socket := *u.Socket
+
+	request := user.GetRegisterRequest(message)
+	inscriptionOk, loginOk, passwordOk := user.InscriptionSite(request.Login, request.Password, request.VerifPassword, request.Mail)
+
+	reply := user.RegisterReply{inscriptionOk, loginOk, passwordOk, request.Login, "", server.roomList.GetRoomsTab()}
+	socket.Emit("register", reply.String())
+
+}
+
 // tryLoginUser try to login user
 func (server *Server) tryLoginUser(u *user.User, message string) {
 	logger.Print("Connexion d'un utilisateur")
-	socket := *u.GetSocket()
+	socket := *u.Socket
 
 	request := user.GetLoginRequest(message)
 	login, password := user.ConnectSite(request.Login, request.Password)
@@ -97,14 +111,14 @@ func (server *Server) tryLoginUser(u *user.User, message string) {
 	success := login && password
 
 	reply := user.LoginReply{success, login, password, request.Login, server.roomList.GetRoomsTab(), ""}
-	socket.Emit("login", reply.ToString())
+	socket.Emit("login", reply.String())
 }
 
 // roomChangement Demande de changement de salle par un client
 func (server *Server) roomChangement(user *user.User, message string) {
 
 	logger.Print("Changement de salle : " + message)
-	socket := *user.GetSocket()
+	socket := *user.Socket
 
 	request := room.GetChangeRoomRequest(message)
 	roomName := request.RoomName
@@ -134,138 +148,20 @@ func (server *Server) roomChangement(user *user.User, message string) {
 }
 
 func (server *Server) saveMessageInDb(message message.SendMessage) {
-	db, err := room.ConnecxionBdconv()
-	if err != nil {
-		logger.Fatal("Erreur lors de l'enregistrement du message dans la bd", err)
-	}
-	defer room.DeconnecxionBdconv(db)
-
-	room.AddConv(db, message)
+	db.Db.AddValue(db.MessageBucket, message.Time, &message)
 }
 
 // messageReception Réception d'un message par un client
 func (server *Server) messageReception(user *user.User, receivedMessage string) {
 
 	logger.Print("Message reçu : " + receivedMessage)
-	socket := *user.GetSocket()
+	socket := *user.Socket
 
 	receivedMessageObject := message.GetMessageObject(receivedMessage)
 
 	messageToBroadcast := message.SendMessage{receivedMessageObject.Content, user.Login, receivedMessageObject.Time, ""}
 	server.saveMessageInDb(messageToBroadcast)
 
-	socket.Emit("message", messageToBroadcast.ToString())
-	socket.BroadcastTo(user.Room, "message", messageToBroadcast.ToString())
+	socket.Emit("message", messageToBroadcast.String())
+	socket.BroadcastTo(user.Room, "message", messageToBroadcast.String())
 }
-
-// AddClient Ajoute un client dans la liste
-/*func (server *Server) AddClient(userName string, userPassword string, userMail string) error {
-	var err error
-
-	_, exist := server.loggedClients[userName]
-	if !exist {
-		server.loggedClients[userName] = user.CreateUser(userName, userPassword, userMail)
-	} else {
-		err = errors.New("Le client existe déjà")
-	}
-
-	return err
-}
-
-// RemoveClient Supprime le client de la liste
-func (server *Server) RemoveClient(userName string) {
-	delete(server.loggedClients, userName)
-}
-
-// ReadMessageFromUser Lit un message depuis l'utilisateur passé en paramètre
-func (server *Server) ReadMessageFromUser(userName string) (string, error) {
-	client, exist := server.loggedClients[userName]
-	if exist {
-		return client.Read()
-	}
-
-	return "", errors.New(ClientNotFoundErr)
-}
-
-// WriteMessageFromUser Ecrit un message à l'utilisateur passé en paramètre
-func (server *Server) WriteMessageFromUser(userName string, message string) error {
-	var err error
-
-	client, exist := server.loggedClients[userName]
-	if exist {
-		client.Write(message)
-	} else {
-		err = errors.New(ClientNotFoundErr)
-	}
-
-	return err
-}
-
-// clientConnection Accepte un client et retourne la websocket
-func (server *Server) clientConnection(w http.ResponseWriter, r *http.Request) *websocket.Conn {
-	conn, err := server.upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		logger.Warning("upgrade", err)
-	}
-
-	server.guestClients = append(server.guestClients, conn)
-	return conn
-}*/
-
-// sendWebPage Retourne la page passée en paramètre au client
-/*func (server *Server) sendWebPage(w io.Writer, pageName string, data interface{}) {
-	var err error
-	t := template.New("app")
-
-	pageFile := pageName + ".html"
-
-	t, err = t.ParseFiles("client/" + pageFile)
-	if err != nil {
-		logger.Warning("Erreur lors de la lecture de la page "+pageName+" : ", err)
-		return
-	}
-
-	err = t.ExecuteTemplate(w, pageFile, data)
-	if err != nil {
-		logger.Warning("Erreur lors de l'exécution du template ", err)
-	}
-}
-
-/** Handler list **/
-/*
-// chatHandler Affiche la page de chat
-func (server *Server) chatHandler(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-
-	if r.URL.Path != "/" {
-		server.notFoundHandler(w, r, params)
-		return
-	}
-
-	server.sendWebPage(w, "index", nil)
-
-	ws := server.clientConnection(w, r)
-	if ws == nil {
-		logger.Fatal("WS nil", nil)
-	}
-
-	ws.SetReadLimit(1024)
-	ws.SetReadDeadline(time.Now().Add(60 * time.Second))
-
-	go func() {
-		for {
-			_, p, err := ws.ReadMessage()
-			if err != nil {
-				logger.Warning("Erreur de lecture : ", err)
-			}
-			fmt.Println(p)
-
-			//for webS := range server.guestClients
-			//ws.WriteMessage(message, p)
-		}
-	}()
-}
-
-// notFoundHandler Appelé lorsque l'url du client est incorrecte. Retourne une page 404.
-func (server *Server) notFoundHandler(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-	server.sendWebPage(w, "404", nil)
-}*/
