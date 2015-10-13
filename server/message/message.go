@@ -39,3 +39,10 @@ func (message *SendMessage) String() string {
 
 	return string(jsonContent[:])
 }
+
+// IsCommand Retourne true si le message est une commande (/command)
+func (message *ReceiveMessage) IsCommand() bool {
+	byteContent := []byte(message.Content)
+
+	return byteContent[0] == '/'
+}

@@ -10,6 +10,7 @@ import (
 	"projet/server/room"
 	"projet/server/user"
 	"time"
+	"fmt"
 )
 
 // Server Représente un objet server avec la liste des clients
@@ -60,7 +61,7 @@ func (server *Server) onConnection(so socketio.Socket) {
 	logger.Print("Client connection")
 
 	roomName := constants.DefaultRoom
-	user := &user.User{Login: "loginServ", Room: roomName, Socket: &so} // TODO Récupérer le login de l'utilisateur
+	user := &user.User{Login: "unknown", Room: roomName, Socket: &so} // TODO Récupérer le login de l'utilisateur
 
 	so.Join(roomName)
 	logger.Print("Client join " + roomName + " room")
@@ -181,9 +182,25 @@ func (server *Server) messageReception(user *user.User, receivedMessage string) 
 
 	receivedMessageObject := message.GetMessageObject(receivedMessage)
 
-	messageToBroadcast := message.SendMessage{receivedMessageObject.Content, user.Login, receivedMessageObject.Time, ""}
-	server.saveMessageInDb(messageToBroadcast, user.Room)
+	if receivedMessageObject.IsCommand() {
+		commandResult := ""
+		switch command := receivedMessageObject.Content; command {
 
-	socket.Emit("message", messageToBroadcast.String())
-	socket.BroadcastTo(user.Room, "message", messageToBroadcast.String())
+		case "/time":
+			currentTime := time.Now()
+			commandResult = fmt.Sprintf("%d/%d/%d - %d:%d:%d", currentTime.Day(), currentTime.Month(), currentTime.Year(),
+				currentTime.Hour(), currentTime.Minute(), currentTime.Second())
+
+		default:
+			commandResult = "Commande inconnue"
+		}
+
+		socket.Emit("command", "{\"Content\": \""+commandResult+"\"}")
+		} else {
+		messageToBroadcast := message.SendMessage{receivedMessageObject.Content, user.Login, receivedMessageObject.Time, ""}
+		server.saveMessageInDb(messageToBroadcast, user.Room)
+
+		socket.Emit("message", messageToBroadcast.String())
+		socket.BroadcastTo(user.Room, "message", messageToBroadcast.String())
+	}
 }

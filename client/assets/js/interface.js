@@ -89,6 +89,20 @@ function switchRoom(roomName, connectedClients, messages){
 }
 
 /**
+ * @param content Contenu du résultat de la commande
+ */
+function addCommand(content){
+  document.getElementById('listComments').innerHTML +=
+  "<div class=\"comment\">"
+      +"<div class=\"content\">"
+          +"<div class=\"text\">"
+            + content
+          +"</div>"
+      +"</div>"
+  +"</div>";
+}
+
+/**
  * @param author auteur du message
  * @param time date du message
  * @param content contenu du message

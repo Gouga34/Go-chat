@@ -10,6 +10,10 @@ socket.on('message', function(data){
                                       printMessage(data);
                                     });
 
+socket.on('command', function(data){
+                                      printCommand(data);
+                                    });
+
 socket.on('changeRoom', function(data){
                                         switchUsersRoom(data);
                                       });
@@ -58,6 +62,15 @@ function getResultOfInscription(data){
 function printMessage(data){
   datas=JSON.parse(data);
   addMessage(datas.Author, datas.Time, datas.Content, data.GravatarLink);
+}
+
+/**
+ * @param data les données reçues
+ * @action affiche le résultat de la commande
+ */
+function printCommand(data){
+  datas=JSON.parse(data);
+  addCommand(datas.Content);
 }
 
 /**
