@@ -70,8 +70,7 @@ function switchUsersRoom(data){
     if(datas.NewRoom){
       addRoom(datas.RoomName);
     }
-
-    switchRoom(datas.RoomName);
+    switchRoom(datas.RoomName, datas.ClientList, datas.MessageList);
   }
 }
 

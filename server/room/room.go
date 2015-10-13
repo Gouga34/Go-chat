@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"projet/server/db"
 	"projet/server/logger"
+	"projet/server/message"
 	"projet/server/user"
 )
 
@@ -62,4 +63,18 @@ func (room *Room) getFromDb(key string) {
 
 func (room *Room) String() string {
 	return "{\"Name\":\"" + room.Name + "\"}"
+}
+
+func (room *Room) GetMessages() []message.SendMessage {
+	messages := db.Db.GetElementsFromBucket(db.MessageBucketPrefix + room.Name)
+	var messagesToSend []message.SendMessage
+	for _, m := range messages {
+		var mess message.SendMessage
+		err := json.Unmarshal([]byte(m), &mess)
+		if err != nil {
+			logger.Error("Désérialisation d'un message", err)
+		}
+		messagesToSend = append(messagesToSend, mess)
+	}
+	return messagesToSend
 }

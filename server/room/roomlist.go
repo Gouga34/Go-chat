@@ -5,6 +5,7 @@ import (
 	"errors"
 	"projet/server/db"
 	"projet/server/logger"
+	"projet/server/message"
 	"projet/server/user"
 	"strconv"
 )
@@ -21,10 +22,11 @@ type ChangeRoomRequest struct {
 
 //ChangeRoomReply Réponse à un changement de salle
 type ChangeRoomReply struct {
-	Success    bool
-	RoomName   string
-	NewRoom    bool
-	ClientList []user.UserDetails
+	Success     bool
+	RoomName    string
+	NewRoom     bool
+	ClientList  []user.UserDetails
+	MessageList []message.SendMessage
 }
 
 //Init initialise la liste des salles
@@ -100,6 +102,7 @@ func (roomList *RoomList) AddRoom(roomName string) error {
 		roomList.rooms[roomName] = &Room{roomName, roomUsers}
 		roomList.rooms[roomName].Init(roomName)
 		roomList.saveRoomInDb(roomName)
+		db.Db.CreateBucket(db.MessageBucketPrefix + roomName)
 	} else {
 		err = errors.New("AddUserInRoom - La salle existe déjà")
 	}

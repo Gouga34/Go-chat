@@ -21,17 +21,21 @@ function addRoom(roomName){
  * @action vide la fenêtre de chats
  */
 function clearCommentsList(){
-  document.getElementById('listComments').innerHTML="";
+  if(document.getElementById('listComments')!=null){
+    document.getElementById('listComments').innerHTML="";
+  }
 }
 
 /**
  * @action change le bouton des salles à "rejoindre"
  */
 function changeRoomsConnectionButtonToDisconnected(){
-  var roomsConnection = document.getElementById('listRooms').getElementsByClassName('ui button tiny gray');
-  if(roomsConnection.length>0){
-    for (i=0; i<roomsConnection.length; i++){
-      roomsConnection[i].innerHTML='Rejoindre'
+  if(document.getElementById('listRooms')!=null){
+    var roomsConnection = document.getElementById('listRooms').getElementsByClassName('ui button tiny gray');
+    if(roomsConnection.length>0){
+      for (i=0; i<roomsConnection.length; i++){
+        roomsConnection[i].innerHTML='Rejoindre'
+      }
     }
   }
 }
@@ -41,9 +45,11 @@ function changeRoomsConnectionButtonToDisconnected(){
  * @action change le bouton de la salle a "connecté"
  */
 function changeRoomConnectionButtonToConnected(roomName){
-  var roomConnected=  document.getElementById(roomName).getElementsByClassName('ui button tiny gray');
-  if(roomConnected.length>0){
-    roomConnected[0].innerHTML='Connecté';
+  if(document.getElementById(roomName)!=null){
+    var roomConnected=  document.getElementById(roomName).getElementsByClassName('ui button tiny gray');
+    if(roomConnected.length>0){
+      roomConnected[0].innerHTML='Connecté';
+    }
   }
 }
 
@@ -63,17 +69,23 @@ function changeRoomConnectionButtonToDisconnected(roomName){
  * @param connectedClients liste des utilisateurs connectés à roomName
  * @action change la room à laquelle est connecté le client et affiche la liste des utilisateurs connectés à la salle.
  */
-function switchRoom(roomName){
+function switchRoom(roomName, connectedClients, messages){
   clearCommentsList();
+  clearConnectedUsersList();
   changeRoomsConnectionButtonToDisconnected();
   changeRoomConnectionButtonToConnected(roomName);
-  if(roomName!="Defaut"){
-    changeRoomConnectionButtonToDisconnected(roomName);
+
+  if(connectedClients!=null){
+    for(var i=0; i<connectedClients.length; i++){
+      addConnectedUserToList(connectedClients[i].Login, connectedClients[i].GravatarLink);
+    }
   }
 
-  // for(var i=0; i<connectedClients.length; i++){
-  //   addConnectedUserToList(connectedClients[i].Login, connectedClients[i].GravatarLink);
-  // }
+  if(messages!=null){
+    for(var i=0; i<messages.length;i++){
+      addMessage(messages[i].Author, messages[i].Time, messages[i].Content, messages[i].GravatarLink);
+    }
+  }
 }
 
 /**
@@ -83,21 +95,23 @@ function switchRoom(roomName){
  * @param image lien gravatar de l'image
  */
 function addMessage(author, time, content, image){
-  document.getElementById('listComments').innerHTML +=
-  "<div class=\"comment\">"
-      +"<a class=\"avatar\">"
-          +"<img src=\""+image+"\">"
-      +"</a>"
-      +"<div class=\"content\">"
-          +"<a class=\"author\">"+author+"</a>"
-          +"<div class=\"metadata\">"
-              +"<span class=\"date\">"+time+"</span>"
-          +"</div>"
-          +"<div class=\"text\">"
-            + content
-          +"</div>"
-      +"</div>"
-  +"</div>";
+  if(document.getElementById('listComments')!=null){
+    document.getElementById('listComments').innerHTML +=
+    "<div class=\"comment\">"
+        +"<a class=\"avatar\">"
+            +"<img src=\""+image+"\">"
+        +"</a>"
+        +"<div class=\"content\">"
+            +"<a class=\"author\">"+author+"</a>"
+            +"<div class=\"metadata\">"
+                +"<span class=\"date\">"+time+"</span>"
+            +"</div>"
+            +"<div class=\"text\">"
+              + content
+            +"</div>"
+        +"</div>"
+    +"</div>";
+  }
 }
 
 /**
@@ -124,7 +138,9 @@ function createRoom(){
  * @action vide la liste des utilisateurs connectés
  */
 function clearConnectedUsersList(){
-  document.getElementById("users").innerHTML="";
+  if(document.getElementById("users")!=null){
+    document.getElementById("users").innerHTML="";
+  }
 }
 
 /**
@@ -133,13 +149,15 @@ function clearConnectedUsersList(){
  * @action ajoute l'utilisateur dans la liste des utilisateurs connectés
  */
 function addConnectedUserToList(login, image){
-  document.getElementById("users").innerHTML+=
-  "<div class=\"item\" id=\""+login+"\">"
-    +"<img class=\"ui avatar image\" src=\""+image+"\">"
-    +"<div class=\"content\">"
-      +"<a class=\"header\">"+login+"</a>"
-    +"</div>"
-  +"</div>";
+  if(document.getElementById("users")!=null){
+    document.getElementById("users").innerHTML+=
+    "<div class=\"item\" id=\""+login+"\">"
+      +"<img class=\"ui avatar image\" src=\""+image+"\">"
+      +"<div class=\"content\">"
+        +"<a class=\"header\">"+login+"</a>"
+      +"</div>"
+    +"</div>";
+  }
 }
 
 /**

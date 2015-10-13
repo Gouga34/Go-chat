@@ -10,7 +10,7 @@ import (
 const DbFile = "chat.db"
 
 //MessageBucket bucket message
-const MessageBucket = "message"
+const MessageBucketPrefix = "Messages_"
 
 //UserBucket bucket user
 const UserBucket = "user"
@@ -52,21 +52,15 @@ func (dbManager *DbManager) disconnection() {
 
 //CreateBucketsIfNotExist Créé l'ensemble des buckets pour le chat s'ils n'existent pas
 func (dbManager *DbManager) CreateBucketsIfNotExist() {
+	dbManager.CreateBucket(UserBucket)
+	dbManager.CreateBucket(RoomBucket)
+}
 
+func (dbManager *DbManager) CreateBucket(bucketName string) {
 	dbManager.db.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists([]byte(UserBucket))
-		if err != nil {
-			logger.Error("Erreur lors de la création du bucket User", err)
-		}
-
-		_, err = tx.CreateBucketIfNotExists([]byte(RoomBucket))
+		_, err := tx.CreateBucketIfNotExists([]byte(bucketName))
 		if err != nil {
 			logger.Error("Erreur lors de la création du bucket Room", err)
-		}
-
-		_, err = tx.CreateBucketIfNotExists([]byte(MessageBucket))
-		if err != nil {
-			logger.Error("Erreur lors de la création du bucket Message", err)
 		}
 
 		return nil

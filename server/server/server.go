@@ -9,6 +9,7 @@ import (
 	"projet/server/message"
 	"projet/server/room"
 	"projet/server/user"
+	"time"
 )
 
 // Server Représente un objet server avec la liste des clients
@@ -98,11 +99,19 @@ func (server *Server) tryInscription(u *user.User, message string) {
 	reply := user.RegisterReply{inscriptionOk, loginOk, passwordOk, request.Login, "", server.roomList.GetRoomsTab()}
 	socket.Emit("register", reply.String())
 
+	if inscriptionOk {
+		u.Login = request.Login
+
+		defaultRoom := server.roomList.GetRoom(constants.DefaultRoom)
+
+		reply := room.ChangeRoomReply{true, defaultRoom.Name, false, defaultRoom.GetUsersDetails(), defaultRoom.GetMessages()}
+		socket.Emit("changeRoom", reply.ToString())
+	}
 }
 
 // tryLoginUser try to login user
 func (server *Server) tryLoginUser(u *user.User, message string) {
-	logger.Print("Connexion d'un utilisateur")
+
 	socket := *u.Socket
 
 	request := user.GetLoginRequest(message)
@@ -112,6 +121,17 @@ func (server *Server) tryLoginUser(u *user.User, message string) {
 
 	reply := user.LoginReply{success, login, password, request.Login, server.roomList.GetRoomsTab(), ""}
 	socket.Emit("login", reply.String())
+
+	if success {
+		u.Login = request.Login
+
+		defaultRoom := server.roomList.GetRoom(constants.DefaultRoom)
+		reply := room.ChangeRoomReply{true, defaultRoom.Name, false, defaultRoom.GetUsersDetails(), defaultRoom.GetMessages()}
+		logger.Print("Connexion d'un utilisateur")
+		logger.Print("ChangeRoom login : " + reply.ToString())
+		time.Sleep(100 * time.Millisecond)
+		socket.Emit("changeRoom", reply.ToString())
+	}
 }
 
 // roomChangement Demande de changement de salle par un client
@@ -132,6 +152,7 @@ func (server *Server) roomChangement(user *user.User, message string) {
 	server.roomList.RemoveUserFromRoom(user.Login, user.Room)
 
 	success := false
+
 	if server.roomList.AddUserInRoom(user, roomName) == nil {
 		socket.Join(roomName)
 		success = true
@@ -139,16 +160,17 @@ func (server *Server) roomChangement(user *user.User, message string) {
 
 	newRoom := server.roomList.GetRoom(roomName)
 	if newRoom != nil {
-		reply := room.ChangeRoomReply{success, roomName, newRoomCreated, newRoom.GetUsersDetails()}
+		reply := room.ChangeRoomReply{success, roomName, newRoomCreated, newRoom.GetUsersDetails(), newRoom.GetMessages()}
 		socket.Emit("changeRoom", reply.ToString())
+		logger.Print(reply.ToString())
 
 		// Envoi du nouvel arrivant à tous les autres membres de la salle
 		socket.BroadcastTo(roomName, "newUser", "{\"Login\": "+user.Login+",\"GravatarLink\": \"\"}")
 	}
 }
 
-func (server *Server) saveMessageInDb(message message.SendMessage) {
-	db.Db.AddValue(db.MessageBucket, message.Time, &message)
+func (server *Server) saveMessageInDb(message message.SendMessage, roomName string) {
+	db.Db.AddValue(db.MessageBucketPrefix+roomName, message.Time, &message)
 }
 
 // messageReception Réception d'un message par un client
@@ -160,7 +182,7 @@ func (server *Server) messageReception(user *user.User, receivedMessage string) 
 	receivedMessageObject := message.GetMessageObject(receivedMessage)
 
 	messageToBroadcast := message.SendMessage{receivedMessageObject.Content, user.Login, receivedMessageObject.Time, ""}
-	server.saveMessageInDb(messageToBroadcast)
+	server.saveMessageInDb(messageToBroadcast, user.Room)
 
 	socket.Emit("message", messageToBroadcast.String())
 	socket.BroadcastTo(user.Room, "message", messageToBroadcast.String())
