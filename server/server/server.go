@@ -178,6 +178,23 @@ func (server *Server) saveMessageInDb(message message.SendMessage, roomName stri
 	db.Db.AddValue(db.MessageBucketPrefix+roomName, message.Time, &message)
 }
 
+func (server *Server) executeCommand(command string) string {
+	commandResult := ""
+
+	switch command {
+
+	case "/time":
+		currentTime := time.Now()
+		commandResult = fmt.Sprintf("%d/%d/%d - %d:%d:%d", currentTime.Day(), currentTime.Month(), currentTime.Year(),
+			currentTime.Hour(), currentTime.Minute(), currentTime.Second())
+
+	default:
+		commandResult = "Commande inconnue"
+	}
+
+	return commandResult
+}
+
 // messageReception Réception d'un message par un client
 func (server *Server) messageReception(user *user.User, receivedMessage string) {
 
@@ -187,22 +204,13 @@ func (server *Server) messageReception(user *user.User, receivedMessage string) 
 	receivedMessageObject := message.GetMessageObject(receivedMessage)
 
 	if receivedMessageObject.IsCommand() {
-		commandResult := ""
-		switch command := receivedMessageObject.Content; command {
-
-		case "/time":
-			currentTime := time.Now()
-			commandResult = fmt.Sprintf("%d/%d/%d - %d:%d:%d", currentTime.Day(), currentTime.Month(), currentTime.Year(),
-				currentTime.Hour(), currentTime.Minute(), currentTime.Second())
-
-		default:
-			commandResult = "Commande inconnue"
-		}
-
+		commandResult := server.executeCommand(receivedMessageObject.Content)
 		socket.Emit("command", "{\"Content\": \""+commandResult+"\"}")
 	} else {
 		messageToBroadcast := message.SendMessage{receivedMessageObject.Content, user.Login, receivedMessageObject.Time, user.GravatarLink}
 		server.saveMessageInDb(messageToBroadcast, user.Room)
+
+		messageToBroadcast.DetectAndAddEmoticonsInMessage()
 
 		socket.Emit("message", messageToBroadcast.String())
 		socket.BroadcastTo(user.Room, "message", messageToBroadcast.String())

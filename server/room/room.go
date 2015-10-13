@@ -74,6 +74,8 @@ func (room *Room) GetMessages() []message.SendMessage {
 		if err != nil {
 			logger.Error("Désérialisation d'un message", err)
 		}
+
+		mess.DetectAndAddEmoticonsInMessage()
 		messagesToSend = append(messagesToSend, mess)
 	}
 	return messagesToSend

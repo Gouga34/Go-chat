@@ -3,6 +3,7 @@ package message
 import (
 	"encoding/json"
 	"projet/server/logger"
+	"strings"
 )
 
 // ReceiveMessage Représente un message reçu par le client
@@ -45,4 +46,17 @@ func (message *ReceiveMessage) IsCommand() bool {
 	byteContent := []byte(message.Content)
 
 	return byteContent[0] == '/'
+}
+
+// DetectAndAddEmoticonsInMessage Remplace les smileys par les balises images correspondantes
+func (message *SendMessage) DetectAndAddEmoticonsInMessage() {
+
+	smileyStyle := "style=\"width: 20px; height: 20px;\""
+
+	message.Content = strings.Replace(message.Content, ":)", "<img src=\"assets/images/smileys/smile.png\" "+smileyStyle+" />", -1)
+	message.Content = strings.Replace(message.Content, ":(", "<img src=\"assets/images/smileys/sad.png\" "+smileyStyle+" />", -1)
+	message.Content = strings.Replace(message.Content, ":D", "<img src=\"assets/images/smileys/grin.png\" "+smileyStyle+" />", -1)
+	message.Content = strings.Replace(message.Content, ":o", "<img src=\"assets/images/smileys/surprise.png\" "+smileyStyle+" />", -1)
+	message.Content = strings.Replace(message.Content, ";)", "<img src=\"assets/images/smileys/wink.png\" "+smileyStyle+" />", -1)
+	message.Content = strings.Replace(message.Content, ":'(", "<img src=\"assets/images/smileys/crying.png\" "+smileyStyle+" />", -1)
 }
