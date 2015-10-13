@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/json"
 	"fmt"
+	gr "github.com/ftrvxmtrx/gravatar"
 	"github.com/googollee/go-socket.io"
 	"projet/server/constants"
 	"projet/server/db"
@@ -12,11 +13,12 @@ import (
 
 // User Représente un utilisateur
 type User struct {
-	Login    string
-	Password [16]byte
-	Mail     string
-	Room     string
-	Socket   *socketio.Socket
+	Login        string
+	Password     [16]byte
+	Mail         string
+	Room         string
+	GravatarLink string
+	Socket       *socketio.Socket
 }
 
 // UserDetails Représente les informations d'un utilisateur dans la liste du client
@@ -67,11 +69,11 @@ func GetRegisterRequest(message string) RegisterRequest {
 	return request
 }
 
-// CreateUser Créé un objet utilisateur et le retourne
-func CreateUser(login string, password [16]byte, mail string) *User {
-	u := &User{login, password, mail, "", nil}
-	return u
-}
+// // CreateUser Créé un objet utilisateur et le retourne
+// func CreateUser(login string, password [16]byte, mail string) *User {
+// 	u := &User{login, password, mail, "", "http://www.gravatar.com/avatar.php?gravatar_id=" + md5(string.ToLower(mail)), nil}
+// 	return u
+// }
 
 // GetLoginRequest Retourne la requête de connexion associée au message
 func GetLoginRequest(message string) LoginRequest {
@@ -112,29 +114,34 @@ func (reply *RegisterReply) String() string {
 }
 
 //ConnectSite  retour : bool,bool le premier bool correspond au login et le second au password
-func ConnectSite(login string, password string) (bool, bool) {
+func ConnectSite(login string, password string) (bool, bool, *User) {
 
 	var u *User = &User{}
 	u.getFromDb(login)
 
 	if u.Login != "" {
 		if u.Login == login && u.Password == md5.Sum([]byte(password)) {
-			return true, true
+			return true, true, u
 		} else {
 			if u.Login != login {
-				return false, false
+				return false, false, u
 			} else {
-				return true, false
+				return true, false, u
 			}
 		}
 	}
 
-	return false, false
+	return false, false, u
+}
+
+func (user *User) CreateGravatarLink() {
+	hashedMail := gr.EmailHash(user.Mail)
+	user.GravatarLink = "http://www.gravatar.com/avatar.php?gravatar_id=" + string(hashedMail[:])
 }
 
 func InscriptionSite(login string, password string, password2 string, mail string) (bool, bool, bool) {
 
-	u := &User{login, md5.Sum([]byte(password)), mail, constants.DefaultRoom, nil}
+	u := &User{login, md5.Sum([]byte(password)), mail, constants.DefaultRoom, "", nil}
 
 	var usr *User = &User{}
 	usr.getFromDb(login)

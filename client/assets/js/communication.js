@@ -61,7 +61,7 @@ function getResultOfInscription(data){
  */
 function printMessage(data){
   datas=JSON.parse(data);
-  addMessage(datas.Author, datas.Time, datas.Content, data.GravatarLink);
+  addMessage(datas.Author, datas.Time, datas.Content, datas.GravatarLink);
 }
 
 /**

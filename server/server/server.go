@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"github.com/googollee/go-socket.io"
 	"net/http"
 	"projet/server/constants"
@@ -10,7 +11,6 @@ import (
 	"projet/server/room"
 	"projet/server/user"
 	"time"
-	"fmt"
 )
 
 // Server Représente un objet server avec la liste des clients
@@ -61,7 +61,7 @@ func (server *Server) onConnection(so socketio.Socket) {
 	logger.Print("Client connection")
 
 	roomName := constants.DefaultRoom
-	user := &user.User{Login: "unknown", Room: roomName, Socket: &so} // TODO Récupérer le login de l'utilisateur
+	user := &user.User{Login: "unknown", Room: roomName, GravatarLink: "", Socket: &so}
 
 	so.Join(roomName)
 	logger.Print("Client join " + roomName + " room")
@@ -97,11 +97,13 @@ func (server *Server) tryInscription(u *user.User, message string) {
 	request := user.GetRegisterRequest(message)
 	inscriptionOk, loginOk, passwordOk := user.InscriptionSite(request.Login, request.Password, request.VerifPassword, request.Mail)
 
-	reply := user.RegisterReply{inscriptionOk, loginOk, passwordOk, request.Login, "", server.roomList.GetRoomsTab()}
+	reply := user.RegisterReply{inscriptionOk, loginOk, passwordOk, request.Login, u.GravatarLink, server.roomList.GetRoomsTab()}
 	socket.Emit("register", reply.String())
 
 	if inscriptionOk {
 		u.Login = request.Login
+		u.Mail = request.Mail
+		u.CreateGravatarLink()
 
 		defaultRoom := server.roomList.GetRoom(constants.DefaultRoom)
 
@@ -116,18 +118,21 @@ func (server *Server) tryLoginUser(u *user.User, message string) {
 	socket := *u.Socket
 
 	request := user.GetLoginRequest(message)
-	login, password := user.ConnectSite(request.Login, request.Password)
+	login, password, newUser := user.ConnectSite(request.Login, request.Password)
 
 	success := login && password
 
-	reply := user.LoginReply{success, login, password, request.Login, server.roomList.GetRoomsTab(), ""}
+	reply := user.LoginReply{success, login, password, request.Login, server.roomList.GetRoomsTab(), u.GravatarLink}
 	socket.Emit("login", reply.String())
 
 	if success {
-		u.Login = request.Login
+		u.Login = newUser.Login
+		u.Mail = newUser.Mail
+		u.CreateGravatarLink()
 
 		defaultRoom := server.roomList.GetRoom(constants.DefaultRoom)
 		reply := room.ChangeRoomReply{true, defaultRoom.Name, false, defaultRoom.GetUsersDetails(), defaultRoom.GetMessages()}
+
 		logger.Print("Connexion d'un utilisateur")
 		logger.Print("ChangeRoom login : " + reply.ToString())
 		time.Sleep(100 * time.Millisecond)
@@ -163,10 +168,9 @@ func (server *Server) roomChangement(user *user.User, message string) {
 	if newRoom != nil {
 		reply := room.ChangeRoomReply{success, roomName, newRoomCreated, newRoom.GetUsersDetails(), newRoom.GetMessages()}
 		socket.Emit("changeRoom", reply.ToString())
-		logger.Print(reply.ToString())
 
 		// Envoi du nouvel arrivant à tous les autres membres de la salle
-		socket.BroadcastTo(roomName, "newUser", "{\"Login\": "+user.Login+",\"GravatarLink\": \"\"}")
+		socket.BroadcastTo(roomName, "newUser", "{\"Login\": "+user.Login+",\"GravatarLink\": \""+user.GravatarLink+"\"}")
 	}
 }
 
@@ -196,8 +200,8 @@ func (server *Server) messageReception(user *user.User, receivedMessage string) 
 		}
 
 		socket.Emit("command", "{\"Content\": \""+commandResult+"\"}")
-		} else {
-		messageToBroadcast := message.SendMessage{receivedMessageObject.Content, user.Login, receivedMessageObject.Time, ""}
+	} else {
+		messageToBroadcast := message.SendMessage{receivedMessageObject.Content, user.Login, receivedMessageObject.Time, user.GravatarLink}
 		server.saveMessageInDb(messageToBroadcast, user.Room)
 
 		socket.Emit("message", messageToBroadcast.String())

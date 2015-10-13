@@ -46,7 +46,7 @@ func (room *Room) GetUsersDetails() []user.UserDetails {
 	var users []user.UserDetails
 
 	for _, value := range room.Users {
-		users = append(users, user.UserDetails{value.Login, ""})
+		users = append(users, user.UserDetails{value.Login, value.GravatarLink})
 	}
 
 	return users
