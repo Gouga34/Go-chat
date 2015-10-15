@@ -111,11 +111,11 @@ function addCommand(content){
 function addMessage(author, time, content, image){
   if(document.getElementById('listComments')!=null){
     document.getElementById('listComments').innerHTML +=
-    "<div class=\"comment\">"
+    "<div class=\"comment\" >"
         +"<a class=\"avatar\">"
             +"<img src=\""+image+"\">"
         +"</a>"
-        +"<div class=\"content\">"
+        +"<div class=\"content\" id=\""+time+"\">"
             +"<a class=\"author\">"+author+"</a>"
             +"<div class=\"metadata\">"
                 +"<span class=\"date\">"+time+"</span>"
@@ -125,6 +125,7 @@ function addMessage(author, time, content, image){
             +"</div>"
         +"</div>"
     +"</div>";
+    document.getElementById('listComments').scrollTop = document.getElementById('listComments').scrollHeight;
   }
 }
 
@@ -182,14 +183,6 @@ function addConnectedUserToList(login, image){
  */
 function connectUser(login, image, roomList){
   alert("Bienvenue "+login);
-  document.getElementById('users').innerHTML+=
-  "<div class=\"item\" id=\"currentUser\">"
-      +"<img class=\"ui avatar image\" src=\""+image+"\">"
-      +"<div class=\"content\">"
-          +"<a class=\"header\">"+login+"</a>"
-      +"</div>"
-  +"</div>";
-
   for (var i = 0; i < roomList.length; i++){
     addRoom(roomList[i]);
   }

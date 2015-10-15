@@ -28,12 +28,24 @@ socket.on('register', function(data){
   getResultOfInscription(data);
 });
 
+socket.on('mp', function(data){
+  getAndPrintPersonalMessage(data);
+})
+
 
 
 //Functions -------------------------------------------------------------------
 
 //Traitement des messages reçus ------------------------------------------
 
+/**
+ * @param data le message perso
+ * @action affiche le message perso reçu.
+ */
+function getAndPrintPersonalMessage(data){
+  datas=JSON.parse(data);
+  addMessage("From : "+datas.Author, datas.Time, datas.Content, datas.GravatarLink);
+}
 
 /**
  * @param data les données reçues
