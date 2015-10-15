@@ -117,6 +117,13 @@ func (server *Server) changeUserRoom(u *user.User, roomName string) {
 	if !server.roomList.Exist(roomName) {
 		server.roomList.AddRoom(roomName)
 		newRoomCreated = true
+		rooms := server.roomList.GetRoomsTab()
+		for _, value := range rooms {
+			err := socket.BroadcastTo(value, "newRoom", "{\"Name\":\""+roomName+"\"}")
+			if err != nil {
+				logger.Error("newRoom - ", err)
+			}
+		}
 	}
 
 	success := false
