@@ -171,6 +171,16 @@ func (server *Server) tryLoginUser(u *user.User, message string) {
 	}
 }
 
+func (server *Server) checkUserNotInRoom(u *user.User) bool {
+
+	room := server.roomList.GetUsersRoom(u.Login)
+
+	if room != nil && u.Room != room.Name {
+		return true
+	}
+	return false
+}
+
 // roomChangement Demande de changement de salle par un client
 func (server *Server) roomChangement(user *user.User, message string) {
 
@@ -179,7 +189,9 @@ func (server *Server) roomChangement(user *user.User, message string) {
 	request := room.GetChangeRoomRequest(message)
 	roomName := request.RoomName
 
-	server.changeUserRoom(user, roomName)
+	if server.checkUserNotInRoom(user) {
+		server.changeUserRoom(user, roomName)
+	}
 }
 
 func (server *Server) saveMessageInDb(message message.SendMessage, roomName string) {
