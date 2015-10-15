@@ -98,6 +98,7 @@ func (server *Server) changeUserRoom(u *user.User, roomName string) {
 	oldRoom := u.Room
 	if server.roomList.RemoveUserFromRoom(u) {
 		socket.BroadcastTo(oldRoom, "userLeft", "{\"Login\": \""+u.Login+"\"}")
+		socket.Leave(oldRoom)
 	}
 
 	newRoomCreated := false
