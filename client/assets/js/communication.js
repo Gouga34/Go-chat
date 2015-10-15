@@ -36,11 +36,22 @@ socket.on('userLeft', function(data){
   deleteUserFromConnectedClients(data);
 })
 
+socket.on('newRoom', function(data){
+  newRoom(data);
+})
 
 
 //Functions -------------------------------------------------------------------
 
 //Traitement des messages reçus ------------------------------------------
+
+/**
+ * @action ajoute les salles
+ */
+function newRoom(data){
+    datas=JSON.parse(data);
+    addRoom(datas.Name);
+}
 
 /**
  * @action ajoute le client qui vient de se connecter à la room
