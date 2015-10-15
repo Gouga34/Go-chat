@@ -8,7 +8,7 @@ function addRoom(roomName){
   document.getElementById('listRooms').innerHTML +=
   "<div class=\"item\" id=\""+roomName+"\" >"
     +"<div class=\"right floated content\">"
-        +"<div class=\"ui button tiny gray\" onclick=\"changeRoom('"+roomName+"')\">Connecté</div>"
+        +"<div class=\"ui button tiny gray\" onclick=\"changeRoom('"+roomName+"')\">Rejoindre</div>"
       +"</div>"
       +"<div class=\"content room\">"
           +roomName
@@ -140,8 +140,11 @@ function getRoomCreationForm(){
  */
 function createRoom(){
   var roomName = document.getElementById('newRoom').value;
-  getRoomCreationForm();
-  changeRoom(roomName);
+
+  if (roomName != "") {
+    getRoomCreationForm();
+    changeRoom(roomName);
+  }
 }
 
 /**
@@ -177,10 +180,12 @@ function addConnectedUserToList(login, image){
  * @action affiche l'utilisateur courant comme connecté
  */
 function connectUser(login, image, roomList){
-  alert("Bienvenue "+login);
+
   for (var i = 0; i < roomList.length; i++){
     addRoom(roomList[i]);
   }
+
+  alert("Bienvenue "+login);
 }
 
 /**

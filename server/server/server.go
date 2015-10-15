@@ -143,7 +143,7 @@ func (server *Server) changeUserRoom(u *user.User, roomName string) {
 		reply = room.ChangeRoomReply{success, roomName, newRoomCreated, nil, nil}
 	}
 
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(500 * time.Millisecond)
 	socket.Emit("changeRoom", reply.ToString())
 }
 

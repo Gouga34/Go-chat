@@ -85,8 +85,9 @@ function getAndPrintPersonalMessage(data){
 function getResultOfInscription(data){
   datas=JSON.parse(data);
   if(datas.Success){
-    $("#content").load('chat.html');
-    connectUser(datas.Login, datas.GravatarLink, datas.RoomList);
+    $("#content").load('chat.html', function() {
+      connectUser(datas.Login, datas.GravatarLink, datas.RoomList);
+    });
   }
   else{
     if(!datas.LoginOk){
@@ -138,8 +139,10 @@ function userConnection(data){
 
   var datas=JSON.parse(data);
   if(datas.Success){
-    $("#content").load('chat.html');
-    connectUser(datas.Login, datas.GravatarLink, datas.RoomList);
+    $("#content").load('chat.html', function() {
+      connectUser(datas.Login, datas.GravatarLink, datas.RoomList);
+    });
+
   }
   else {
     printConnectionError(datas.LoginOk, datas.PasswordOk)
@@ -181,10 +184,10 @@ function changeRoom(data){
  */
 function senddata() {
    var data = document.getElementById('textToSend').value;
-   if (data.length != 0)
-   {
-   var time=new Date(Date.now());
-   var messageToSend={Content:data, Author:"", Time: time.toLocaleDateString()+" "+time.toLocaleTimeString()};
-   var serializedMessage = JSON.stringify(messageToSend);
-   socket.emit('message', serializedMessage);}
+   if (data.length != 0){
+     var time=new Date(Date.now());
+     var messageToSend={Content:data, Author:"", Time: time.toLocaleDateString()+" "+time.toLocaleTimeString()};
+     var serializedMessage = JSON.stringify(messageToSend);
+     socket.emit('message', serializedMessage);
+   }
 }
