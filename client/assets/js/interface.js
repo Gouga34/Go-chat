@@ -231,3 +231,11 @@ function checkIfPasswordsAreTheSame(){
    }
    return true;
 }
+
+/**
+ * @param idDiv id de la div à supprimer
+ * @action supprime la div ayant pour id idDiv
+ */
+function deleteDiv(idDiv){
+  $("#"+idDiv ).remove();
+}

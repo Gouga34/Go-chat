@@ -21,7 +21,7 @@ socket.on('changeRoom', function(data){
 socket.on('disconnect', function(){});
 
 socket.on('newUser', function(data){
-                                      addConnectedUserToList(data.Login, data.GravatarLink);
+                                      addConnectedNewUser(data);
                                     });
 
 socket.on('register', function(data){
@@ -32,11 +32,31 @@ socket.on('mp', function(data){
   getAndPrintPersonalMessage(data);
 })
 
+socket.on('userLeft', function(data){
+  deleteUserFromConnectedClients(data);
+})
+
 
 
 //Functions -------------------------------------------------------------------
 
 //Traitement des messages reçus ------------------------------------------
+
+/**
+ * @action ajoute le client qui vient de se connecter à la room
+ */
+function addConnectedNewUser(data){
+    datas=JSON.parse(data);
+    addConnectedUserToList(datas.Login, datas.GravatarLink);
+}
+
+/**
+ * @action supprime le client qui vient de se déconnecter de la room
+ */
+function deleteUserFromConnectedClients(data){
+  datas=JSON.parse(data);
+  deleteDiv(datas.Login);
+}
 
 /**
  * @param data le message perso
