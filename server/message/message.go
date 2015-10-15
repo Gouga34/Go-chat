@@ -43,16 +43,27 @@ func (message *SendMessage) String() string {
 
 // IsCommand Retourne true si le message est une commande (/command)
 func (message *ReceiveMessage) IsCommand() bool {
-	byteContent := []byte(message.Content)
+	if len(message.Content) > 0 {
+		byteContent := []byte(message.Content)
+		return byteContent[0] == '/'
+	}
 
-	return byteContent[0] == '/'
+	return false
 }
 
 // IsMp Retourne true si le message est un mp (/mp)
 func (message *ReceiveMessage) IsMp() bool {
-	byteContent := []byte(message.Content)
+	if len(message.Content) > 3 {
+		byteContent := []byte(message.Content)
+		return string(byteContent[:3]) == "/mp"
+	}
 
-	return string(byteContent[:3]) == "/mp"
+	return false
+}
+
+// IsEmpty Retourne true si le message est vide
+func (message *ReceiveMessage) IsEmpty() bool {
+	return !(len(message.Content) > 0)
 }
 
 // DetectAndAddEmoticonsInMessage Remplace les smileys par les balises images correspondantes

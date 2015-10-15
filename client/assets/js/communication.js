@@ -184,7 +184,7 @@ function changeRoom(data){
  */
 function senddata() {
    var data = document.getElementById('textToSend').value;
-   if (data.length != 0){
+   if (data.length > 0){
      var time=new Date(Date.now());
      var messageToSend={Content:data, Author:"", Time: time.toLocaleDateString()+" "+time.toLocaleTimeString()};
      var serializedMessage = JSON.stringify(messageToSend);

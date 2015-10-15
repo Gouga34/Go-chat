@@ -88,6 +88,13 @@ function switchRoom(roomName, connectedClients, messages){
 }
 
 /**
+ * @action Scroll automatiquement lors de l'ajout de nouveaux messages
+ */
+function scrollToConversationBottom(){
+  document.getElementById('listComments').scrollTop = document.getElementById('listComments').scrollHeight;
+}
+
+/**
  * @param content Contenu du résultat de la commande
  */
 function addCommand(content){
@@ -99,6 +106,8 @@ function addCommand(content){
           +"</div>"
       +"</div>"
   +"</div>";
+
+  scrollToConversationBottom();
 }
 
 /**
@@ -124,7 +133,8 @@ function addMessage(author, time, content, image){
             +"</div>"
         +"</div>"
     +"</div>";
-    document.getElementById('listComments').scrollTop = document.getElementById('listComments').scrollHeight;
+
+    scrollToConversationBottom();
   }
 }
 

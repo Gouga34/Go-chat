@@ -268,7 +268,10 @@ func (server *Server) messageReception(user *user.User, receivedMessage string) 
 				socket.Emit("command", "{\"Content\": \""+reply+"\"}")
 			} else {
 				receivedMessageObject.Content = strings.Join(messageParts[2:], " ")
-				server.sendMessageToUser(user, receiver, receivedMessageObject)
+
+				if !receivedMessageObject.IsEmpty() {
+					server.sendMessageToUser(user, receiver, receivedMessageObject)
+				}
 			}
 		}
 	} else if receivedMessageObject.IsCommand() {
@@ -276,7 +279,7 @@ func (server *Server) messageReception(user *user.User, receivedMessage string) 
 		commandResult := server.executeCommand(receivedMessageObject.Content)
 		socket.Emit("command", "{\"Content\": \""+commandResult+"\"}")
 
-	} else {
+	} else if !receivedMessageObject.IsEmpty() {
 		messageToBroadcast := message.SendMessage{receivedMessageObject.Content, user.Login, receivedMessageObject.Time, user.GravatarLink}
 		server.saveMessageInDb(messageToBroadcast, user.Room)
 
