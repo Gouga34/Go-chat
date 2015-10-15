@@ -10,6 +10,7 @@ import (
 	"projet/server/message"
 	"projet/server/room"
 	"projet/server/user"
+	"strings"
 	"time"
 )
 
@@ -61,7 +62,7 @@ func (server *Server) onConnection(so socketio.Socket) {
 	logger.Print("Client connection")
 
 	roomName := constants.DefaultRoom
-	user := &user.User{Login: "unknown", Room: roomName, GravatarLink: "", Socket: &so}
+	user := &user.User{Login: "unknown", GravatarLink: "", Socket: &so}
 
 	so.Join(roomName)
 	logger.Print("Client join " + roomName + " room")
@@ -106,6 +107,10 @@ func (server *Server) tryInscription(u *user.User, message string) {
 		u.CreateGravatarLink()
 
 		defaultRoom := server.roomList.GetRoom(constants.DefaultRoom)
+		if server.roomList.AddUserInRoom(u, defaultRoom.Name) == nil {
+			socket.Join(defaultRoom.Name)
+			socket.BroadcastTo(defaultRoom.Name, "newUser", "{\"Login\": "+u.Login+",\"GravatarLink\": \""+u.GravatarLink+"\"}")
+		}
 
 		reply := room.ChangeRoomReply{true, defaultRoom.Name, false, defaultRoom.GetUsersDetails(), defaultRoom.GetMessages()}
 		socket.Emit("changeRoom", reply.ToString())
@@ -131,10 +136,14 @@ func (server *Server) tryLoginUser(u *user.User, message string) {
 		u.CreateGravatarLink()
 
 		defaultRoom := server.roomList.GetRoom(constants.DefaultRoom)
+		if server.roomList.AddUserInRoom(u, defaultRoom.Name) == nil {
+			socket.Join(defaultRoom.Name)
+			socket.BroadcastTo(defaultRoom.Name, "newUser", "{\"Login\": "+u.Login+",\"GravatarLink\": \""+u.GravatarLink+"\"}")
+		}
+
 		reply := room.ChangeRoomReply{true, defaultRoom.Name, false, defaultRoom.GetUsersDetails(), defaultRoom.GetMessages()}
 
 		logger.Print("Connexion d'un utilisateur")
-		logger.Print("ChangeRoom login : " + reply.ToString())
 		time.Sleep(100 * time.Millisecond)
 		socket.Emit("changeRoom", reply.ToString())
 	}
@@ -203,9 +212,32 @@ func (server *Server) messageReception(user *user.User, receivedMessage string) 
 
 	receivedMessageObject := message.GetMessageObject(receivedMessage)
 
-	if receivedMessageObject.IsCommand() {
+	if receivedMessageObject.IsMp() {
+
+		// TODO Vérifier que l'utilisateur est dans la même salle et pas soi même
+
+		messageParts := strings.Split(receivedMessageObject.Content, " ")
+		dest := messageParts[1]
+		destRoom := server.roomList.GetUsersRoom(dest)
+
+		if destRoom != nil {
+
+			destUser := destRoom.GetUser(dest)
+
+			if destUser != nil {
+
+				messageToBroadcast := message.SendMessage{strings.Join(messageParts[2:], " "), user.Login, receivedMessageObject.Time, user.GravatarLink}
+				messageToBroadcast.DetectAndAddEmoticonsInMessage()
+
+				destSocket := *destUser.Socket
+				destSocket.Emit("mp", messageToBroadcast.String())
+			}
+		}
+	} else if receivedMessageObject.IsCommand() {
+
 		commandResult := server.executeCommand(receivedMessageObject.Content)
 		socket.Emit("command", "{\"Content\": \""+commandResult+"\"}")
+
 	} else {
 		messageToBroadcast := message.SendMessage{receivedMessageObject.Content, user.Login, receivedMessageObject.Time, user.GravatarLink}
 		server.saveMessageInDb(messageToBroadcast, user.Room)

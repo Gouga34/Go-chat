@@ -48,6 +48,13 @@ func (message *ReceiveMessage) IsCommand() bool {
 	return byteContent[0] == '/'
 }
 
+// IsMp Retourne true si le message est un mp (/mp)
+func (message *ReceiveMessage) IsMp() bool {
+	byteContent := []byte(message.Content)
+
+	return string(byteContent[:3]) == "/mp"
+}
+
 // DetectAndAddEmoticonsInMessage Remplace les smileys par les balises images correspondantes
 func (message *SendMessage) DetectAndAddEmoticonsInMessage() {
 
