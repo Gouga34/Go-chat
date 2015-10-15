@@ -134,11 +134,17 @@ func (roomList *RoomList) AddUserInRoom(user *user.User, roomName string) error 
 }
 
 //RemoveUserFromRoom supprime l'utilisateur de la salle
-func (roomList *RoomList) RemoveUserFromRoom(userLogin string, roomName string) {
+func (roomList *RoomList) RemoveUserFromRoom(user *user.User) bool {
+	roomName := user.Room
+
 	room, _ := roomList.rooms[roomName]
 	if room != nil {
-		room.RemoveUser(userLogin)
+		room.RemoveUser(user.Login)
 	}
+
+	user.Room = ""
+
+	return (room != nil)
 }
 
 //GetUsersRoom Récupère la room dans laquelle l'utilisateur est (nil si pas de room)
