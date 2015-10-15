@@ -11,7 +11,6 @@ function addRoom(roomName){
         +"<div class=\"ui button tiny gray\" onclick=\"changeRoom('"+roomName+"')\">Connecté</div>"
       +"</div>"
       +"<div class=\"content room\">"
-          +"<div class=\"ui label teal circular\" >5</div>"
           +roomName
       +"</div>"
   +"</div>";
@@ -133,11 +132,8 @@ function addMessage(author, time, content, image){
  * @action affiche le formulaire de création d'une room
  */
 function getRoomCreationForm(){
-  document.getElementById('listRooms').innerHTML+=
-  "<div class=\"ui fluid action input\" id=\"addRoom\">"
-        +"<input id=\"newRoom\" type=\"text\" placeholder=\"Nom de la salle\">"
-        +"<div class=\"ui button teal\" onclick=\"createRoom()\"><i class=\"send icon\" ></i>Créer</div>"
-    +"</div>";
+
+  $('#addRoom').toggle();
 }
 
 /**
