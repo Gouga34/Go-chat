@@ -132,7 +132,6 @@ function addMessage(author, time, content, image){
  * @action affiche le formulaire de création d'une room
  */
 function getRoomCreationForm(){
-
   $('#addRoom').toggle();
 }
 
@@ -141,7 +140,7 @@ function getRoomCreationForm(){
  */
 function createRoom(){
   var roomName = document.getElementById('newRoom').value;
-  document.getElementById('listRooms').removeChild(document.getElementById('addRoom'));
+  getRoomCreationForm();
   changeRoom(roomName);
 }
 

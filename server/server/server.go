@@ -93,7 +93,12 @@ func (server *Server) onConnection(so socketio.Socket) {
 	})
 
 	so.On("disconnection", func() {
-		logger.Print("on disconnect")
+		oldRoom := user.Room
+
+		if server.roomList.RemoveUserFromRoom(user) {
+			so.BroadcastTo(oldRoom, "userLeft", "{\"Login\": \""+user.Login+"\"}")
+			so.Leave(oldRoom)
+		}
 	})
 }
 
