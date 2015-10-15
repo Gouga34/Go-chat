@@ -32,6 +32,12 @@ func CreateServer() Server {
 
 	db.Init()
 
+	if db.Db.Get(db.RoomBucket, constants.DefaultRoom) == nil {
+		var room room.Room
+		room.Name = constants.DefaultRoom
+		db.Db.AddValue(db.RoomBucket, constants.DefaultRoom, &room)
+	}
+
 	server.createRouter()
 	server.roomList.Init()
 
@@ -93,6 +99,7 @@ func (server *Server) onConnection(so socketio.Socket) {
 
 func (server *Server) changeUserRoom(u *user.User, roomName string) {
 
+	logger.Print("Changement de salle : " + roomName)
 	socket := *u.Socket
 
 	oldRoom := u.Room
@@ -111,7 +118,6 @@ func (server *Server) changeUserRoom(u *user.User, roomName string) {
 	if server.roomList.AddUserInRoom(u, roomName) == nil {
 
 		socket.Join(roomName)
-		logger.Print("ENVOI de " + "{\"Login\": \"" + u.Login + "\",\"GravatarLink\": \"" + u.GravatarLink + "\"}")
 		socket.BroadcastTo(roomName, "newUser", "{\"Login\": \""+u.Login+"\",\"GravatarLink\": \""+u.GravatarLink+"\"}")
 
 		success = true
@@ -171,11 +177,11 @@ func (server *Server) tryLoginUser(u *user.User, message string) {
 	}
 }
 
-func (server *Server) checkUserNotInRoom(u *user.User) bool {
+func (server *Server) checkUserNotInRoom(u *user.User, roomName string) bool {
 
 	room := server.roomList.GetUsersRoom(u.Login)
 
-	if room != nil && u.Room != room.Name {
+	if room != nil && room.Name != roomName {
 		return true
 	}
 	return false
@@ -184,12 +190,10 @@ func (server *Server) checkUserNotInRoom(u *user.User) bool {
 // roomChangement Demande de changement de salle par un client
 func (server *Server) roomChangement(user *user.User, message string) {
 
-	logger.Print("Changement de salle : " + message)
-
 	request := room.GetChangeRoomRequest(message)
 	roomName := request.RoomName
 
-	if server.checkUserNotInRoom(user) {
+	if server.checkUserNotInRoom(user, roomName) {
 		server.changeUserRoom(user, roomName)
 	}
 }
@@ -215,6 +219,21 @@ func (server *Server) executeCommand(command string) string {
 	return commandResult
 }
 
+func (server *Server) sendMessageToUser(sender *user.User, receiver string, messageToSend message.ReceiveMessage) {
+
+	receiverRoom := server.roomList.GetUsersRoom(receiver)
+	receiverUser := receiverRoom.GetUser(receiver)
+
+	if receiverUser != nil {
+
+		messageToBroadcast := message.SendMessage{messageToSend.Content, sender.Login, messageToSend.Time, sender.GravatarLink}
+		messageToBroadcast.DetectAndAddEmoticonsInMessage()
+
+		receiverSocket := *receiverUser.Socket
+		receiverSocket.Emit("mp", messageToBroadcast.String())
+	}
+}
+
 // messageReception Réception d'un message par un client
 func (server *Server) messageReception(user *user.User, receivedMessage string) {
 
@@ -223,23 +242,21 @@ func (server *Server) messageReception(user *user.User, receivedMessage string) 
 
 	if receivedMessageObject.IsMp() {
 
-		// TODO Vérifier que l'utilisateur est dans la même salle et pas soi même
-
 		messageParts := strings.Split(receivedMessageObject.Content, " ")
-		dest := messageParts[1]
-		destRoom := server.roomList.GetUsersRoom(dest)
+		receiver := messageParts[1]
 
-		if destRoom != nil {
+		if receiver == user.Login {
+			reply := "On ne s'envoie pas de message à soi-même"
+			socket.Emit("command", "{\"Content\": \""+reply+"\"}")
+		} else {
+			receiverRoom := server.roomList.GetUsersRoom(receiver)
 
-			destUser := destRoom.GetUser(dest)
-
-			if destUser != nil {
-
-				messageToBroadcast := message.SendMessage{strings.Join(messageParts[2:], " "), user.Login, receivedMessageObject.Time, user.GravatarLink}
-				messageToBroadcast.DetectAndAddEmoticonsInMessage()
-
-				destSocket := *destUser.Socket
-				destSocket.Emit("mp", messageToBroadcast.String())
+			if receiverRoom == nil || receiverRoom.Name != user.Room {
+				reply := "L'utilisateur " + receiver + " n'est pas dans la salle !"
+				socket.Emit("command", "{\"Content\": \""+reply+"\"}")
+			} else {
+				receivedMessageObject.Content = strings.Join(messageParts[2:], " ")
+				server.sendMessageToUser(user, receiver, receivedMessageObject)
 			}
 		}
 	} else if receivedMessageObject.IsCommand() {
