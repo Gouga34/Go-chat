@@ -15,19 +15,12 @@
 
 #### Pré-requis
 
-*
 ```bash
-go get github.com/googollee/go-socket.io
-```
+$ go get github.com/googollee/go-socket.io
 
-*
-```bash
-go get github.com/ftrvxmtrx/gravatar
-```
+$ go get github.com/ftrvxmtrx/gravatar
 
-*
-```bash
-go get github.com/boltdb/bolt
+$ go get github.com/boltdb/bolt
 ```
 
 #### Installation
