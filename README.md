@@ -15,11 +15,11 @@
 
 #### Pré-requis
 
-* Package websocket io
+* Package websocket io\n
 ```bash
 go get github.com/googollee/go-socket.io
 ```
-* Package gravatar
+* Package gravatar\n
 ```bash
 go get github.com/ftrvxmtrx/gravatar
 ```
@@ -37,14 +37,14 @@ make
 
 #### Utilisation
 
-* Lancement du serveur
+* Lancement du serveur (avec port d'écoute en paramètre optionnel, le port par défaut est 1200)
 ```bash
-./serverChat
+./serverChat [port]
 ```
 
 * Client
 ```bash
-http://localhost:1200/
+http://localhost:<port>/
 ```
 * Commandes du chat
 
@@ -57,6 +57,13 @@ Commande pour envoyer un message privé
 ```bash
 /mp <member> <message>
 ```
+* Emoticônes disponibles
+- :)
+- :(
+- ;)
+- :D
+- :'(
+- :o
 
 ---
 
