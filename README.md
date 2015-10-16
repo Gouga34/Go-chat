@@ -15,11 +15,12 @@
 
 #### Pré-requis
 
-* Package websocket io
+* 
 ```bash
 go get github.com/googollee/go-socket.io
 ```
-* Package gravatar
+
+* 
 ```bash
 go get github.com/ftrvxmtrx/gravatar
 ```
