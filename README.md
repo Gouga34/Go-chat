@@ -15,11 +15,11 @@
 
 #### Pré-requis
 
-* Package websocket io\n
+* Package websocket io
 ```bash
 go get github.com/googollee/go-socket.io
 ```
-* Package gravatar\n
+* Package gravatar
 ```bash
 go get github.com/ftrvxmtrx/gravatar
 ```
@@ -58,12 +58,12 @@ Commande pour envoyer un message privé
 /mp <member> <message>
 ```
 * Emoticônes disponibles
-- :)
-- :(
-- ;)
-- :D
-- :'(
-- :o
+    - :)
+    - :(
+    - ;)
+    - :D
+    - :'(
+    - :o
 
 ---
 
